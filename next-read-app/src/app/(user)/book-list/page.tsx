@@ -1,34 +1,32 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Filter, ShoppingCart } from "lucide-react";
+import { Filter } from "lucide-react";
 
-import heartIcon from "@/assets/icons/heart.svg";
+import { FavoriteButton } from "@/components/shared/favorite-button";
+import { CartButton } from "@/components/shared/cart-button";
 import bookIcon from "@/assets/icons/TrendingBook/Icon-1.svg";
 import starIcon from "@/assets/icons/TrendingBook/Icon.svg";
 import { AppNav } from "@/components/layout/app-nav";
 import { Footer } from "@/components/layout/footer";
+import { CatalogUnavailable } from "@/components/shared/catalog-unavailable";
+import { InlineErrorNotice } from "@/components/shared/inline-error-notice";
 import { Card, CardContent } from "@/components/ui/card";
-import { mockBooks } from "@/data/mock-books";
 import { cn } from "@/lib/utils";
+import { getApiErrorMessage } from "@/lib/error-message";
+import { getBooks } from "@/services/books";
+import { getCategories } from "@/services/categories";
 import type { Book } from "@/types/book";
 import type { FilterItem } from "@/types/filter";
 
-const categoryLabels = [
-  "Fiction",
-  "Non-Fiction",
-  "Self-Improvement",
-  "Finance",
-  "Science & Technology",
-  "Education",
-];
-
 const ratingValues = [5, 4, 3, 2, 1];
+const BOOKS_PER_PAGE = 12;
 
 type BookListPageProps = {
   searchParams?: Promise<{
     category?: string | string[];
     rating?: string | string[];
     search?: string | string[];
+    page?: string | string[];
   }>;
 };
 
@@ -44,10 +42,12 @@ const buildBookListHref = ({
   category,
   rating,
   search,
+  page,
 }: {
   category?: string;
   rating?: number;
   search?: string;
+  page?: number;
 }) => {
   const params = new URLSearchParams();
 
@@ -63,11 +63,15 @@ const buildBookListHref = ({
     params.set("search", search);
   }
 
+  if (page && page > 1) {
+    params.set("page", page.toString());
+  }
+
   const queryString = params.toString();
   return queryString ? `/book-list?${queryString}` : "/book-list";
 };
 
-const getCategoryFilters = ({
+const getCategoryFilters = async ({
   selectedCategory,
   selectedRating,
   searchQuery,
@@ -75,16 +79,25 @@ const getCategoryFilters = ({
   selectedCategory?: string;
   selectedRating?: number;
   searchQuery?: string;
-}): FilterItem[] =>
-  categoryLabels.map((label) => ({
-    label,
-    active: label === selectedCategory,
+}): Promise<FilterItem[]> => [
+  {
+    label: "All",
+    active: !selectedCategory,
     href: buildBookListHref({
-      category: label,
       rating: selectedRating,
       search: searchQuery,
     }),
-  }));
+  },
+  ...(await getCategories()).map((category) => ({
+    label: category.name,
+    active: category.name === selectedCategory,
+    href: buildBookListHref({
+      category: category.name,
+      rating: selectedRating,
+      search: searchQuery,
+    }),
+  })),
+];
 
 const getRatingFilters = ({
   selectedCategory,
@@ -94,16 +107,25 @@ const getRatingFilters = ({
   selectedCategory?: string;
   selectedRating?: number;
   searchQuery?: string;
-}): FilterItem[] =>
-  ratingValues.map((rating) => ({
+}): FilterItem[] => [
+  {
+    label: "All Rating",
+    active: !selectedRating,
+    href: buildBookListHref({
+      category: selectedCategory,
+      search: searchQuery,
+    }),
+  },
+  ...ratingValues.map((rating) => ({
     label: `★ ${rating}`,
     active: rating === selectedRating,
     href: buildBookListHref({
       category: selectedCategory,
-      rating,
+      rating: rating === selectedRating ? undefined : rating,
       search: searchQuery,
     }),
-  }));
+  })),
+];
 
 function FilterGroup({ title, items }: { title: string; items: FilterItem[] }) {
   return (
@@ -118,12 +140,12 @@ function FilterGroup({ title, items }: { title: string; items: FilterItem[] }) {
             <>
               <span
                 className={cn(
-                  "flex size-5 items-center justify-center rounded-md border border-palette-indigo-300-20 bg-white/5",
+                  "flex size-5 items-center justify-center rounded-md border border-palette-indigo-300-20 bg-secondary",
                   item.active && "border-skyblue bg-skyblue",
                 )}
               >
                 {item.active ? (
-                  <span className="size-2 rounded-sm bg-[#101632]" />
+                  <span className="size-2 rounded-sm bg-card" />
                 ) : null}
               </span>
               {item.label}
@@ -134,6 +156,8 @@ function FilterGroup({ title, items }: { title: string; items: FilterItem[] }) {
             <Link
               key={item.label}
               href={item.href}
+              scroll={false}
+              aria-current={item.active ? "true" : undefined}
               className={cn(
                 "flex items-center gap-3 text-[15px] leading-6 font-extrabold text-palette-slate-400 transition-colors hover:text-palette-cyan-300",
                 item.active && "text-palette-slate-50",
@@ -155,7 +179,7 @@ function FilterGroup({ title, items }: { title: string; items: FilterItem[] }) {
   );
 }
 
-function BookFilterCard({
+async function BookFilterCard({
   selectedCategory,
   selectedRating,
   searchQuery,
@@ -164,11 +188,28 @@ function BookFilterCard({
   selectedRating?: number;
   searchQuery?: string;
 }) {
-  const categories = getCategoryFilters({
-    selectedCategory,
-    selectedRating,
-    searchQuery,
-  });
+  let categories: FilterItem[];
+  let categoriesUnavailable = false;
+
+  try {
+    categories = await getCategoryFilters({
+      selectedCategory,
+      selectedRating,
+      searchQuery,
+    });
+  } catch {
+    categoriesUnavailable = true;
+    categories = [
+      {
+        label: "All",
+        active: !selectedCategory,
+        href: buildBookListHref({
+          rating: selectedRating,
+          search: searchQuery,
+        }),
+      },
+    ];
+  }
   const ratings = getRatingFilters({
     selectedCategory,
     selectedRating,
@@ -187,35 +228,79 @@ function BookFilterCard({
 
         <div className="pt-7">
           <FilterGroup title="Category" items={categories} />
+          {categoriesUnavailable ? (
+            <InlineErrorNotice
+              title="Kategori belum dapat dimuat"
+              message="Daftar kategori sedang tidak tersedia."
+              className="pt-4 text-xs leading-5 text-amber-300"
+            />
+          ) : null}
         </div>
 
         <div className="my-10 h-px bg-palette-indigo-300-20" />
 
         <FilterGroup title="Rating" items={ratings} />
+        <p className="pt-4 text-xs leading-5 text-palette-slate-400">
+          Ratings are grouped by whole stars: 4 means 4.0–4.9. Click the
+          selected rating again to clear it.
+        </p>
       </CardContent>
     </Card>
   );
 }
 
-function BookCard({ title, author, category, rating, coverClassName }: Book) {
+function BookCard({
+  id,
+  title,
+  author,
+  category,
+  rating,
+  coverUrl,
+  coverClassName,
+  availableCopies,
+  isAvailable,
+}: Book) {
   return (
-    <Card className="h-[404px] rounded-[28px] border border-palette-indigo-300-20 bg-palette-slate-900-80 p-0 py-0 shadow-none ring-0 transition-all duration-200 hover:border-palette-cyan-300 hover:bg-gray-800">
+    <Card className="relative h-full rounded-[28px] border border-palette-indigo-300-20 bg-palette-slate-900-80 p-0 py-0 shadow-none ring-0 transition-all duration-200 hover:border-palette-cyan-300 hover:bg-gray-800">
       <CardContent className="flex h-full flex-col px-5 py-5">
         <div
           className={cn(
-            "flex h-[224px] w-full flex-col justify-between rounded-[18px] p-5 shadow-[0px_10px_15px_-3px_rgba(0,_0,_0,_0.3),_0px_4px_6px_-4px_rgba(0,_0,_0,_0.3)]",
+            "relative aspect-[2/3] w-full overflow-hidden rounded-[18px] shadow-[0px_10px_15px_-3px_rgba(0,_0,_0,_0.3),_0px_4px_6px_-4px_rgba(0,_0,_0,_0.3)]",
             coverClassName,
           )}
         >
-          <Image src={bookIcon} alt="" className="size-7" aria-hidden="true" />
-          <h3 className="max-w-[150px] text-[22px] leading-6 font-extrabold text-white">
-            {title}
-          </h3>
+          {coverUrl ? (
+            <Image
+              src={coverUrl}
+              alt={`Cover ${title}`}
+              fill
+              unoptimized
+              sizes="(min-width: 1280px) 270px, (min-width: 640px) 50vw, 100vw"
+              className="object-cover"
+            />
+          ) : (
+            <div className="flex h-full flex-col justify-between p-5">
+              <Image
+                src={bookIcon}
+                alt=""
+                className="size-7"
+                aria-hidden="true"
+              />
+              <h3 className="max-w-[150px] text-[22px] leading-6 font-extrabold text-white">
+                {title}
+              </h3>
+            </div>
+          )}
         </div>
 
         <div className="flex flex-1 flex-col pt-5">
           <h4 className="text-[18px] leading-6 font-extrabold text-palette-slate-50">
-            {title}
+            <Link
+              href={`/books/${encodeURIComponent(id)}`}
+              className="hover:text-skyblue after:absolute after:inset-0 after:z-10 after:rounded-[28px] focus-visible:outline-none focus-visible:after:outline-2 focus-visible:after:outline-offset-4 focus-visible:after:outline-skyblue"
+            >
+              {title}
+            </Link>
           </h4>
           <p className="pt-1 text-base leading-6 font-bold text-palette-slate-50/90">
             {author}
@@ -235,20 +320,18 @@ function BookCard({ title, author, category, rating, coverClassName }: Book) {
               <b className="text-sm leading-5">{rating.toFixed(1)}</b>
             </div>
             <div className="flex items-center gap-2">
-              <span className="flex size-9 shrink-0 items-center justify-center rounded-full border border-palette-indigo-300-20 bg-gray-200">
-                <ShoppingCart
-                  className="size-4 text-palette-slate-50"
-                  aria-hidden="true"
-                />
-              </span>
-              <span className="flex size-9 shrink-0 items-center justify-center rounded-full border border-palette-indigo-300-20 bg-gray-200">
-                <Image
-                  src={heartIcon}
-                  alt=""
-                  className="size-4"
-                  aria-hidden="true"
-                />
-              </span>
+              <CartButton book={{ id, title, availableCopies, isAvailable }} />
+              <FavoriteButton
+                book={{
+                  id,
+                  title,
+                  author,
+                  category,
+                  rating,
+                  coverUrl,
+                  coverClassName,
+                }}
+              />
             </div>
           </div>
         </div>
@@ -257,7 +340,9 @@ function BookCard({ title, author, category, rating, coverClassName }: Book) {
   );
 }
 
-export default async function BookListPage({ searchParams }: BookListPageProps) {
+export default async function BookListPage({
+  searchParams,
+}: BookListPageProps) {
   const resolvedSearchParams = await searchParams;
   const selectedCategory = getParamValue(resolvedSearchParams?.category);
   const selectedRatingParam = getParamValue(resolvedSearchParams?.rating);
@@ -265,33 +350,39 @@ export default async function BookListPage({ searchParams }: BookListPageProps) 
     ? Number(selectedRatingParam)
     : undefined;
   const searchQuery = getParamValue(resolvedSearchParams?.search)?.trim();
-  const normalizedSearchQuery = searchQuery?.toLowerCase();
-  const filteredBooks = mockBooks.filter((book) => {
-    const matchesCategory = selectedCategory
-      ? book.category === selectedCategory
-      : true;
-    const matchesSearch = normalizedSearchQuery
-      ? [book.title, book.author, book.category].some((value) =>
-          value.toLowerCase().includes(normalizedSearchQuery),
-        )
-      : true;
-    const matchesRating = selectedRating
-      ? Math.floor(book.rating) === selectedRating
-      : true;
+  const requestedPage = Number(getParamValue(resolvedSearchParams?.page));
+  const currentPage =
+    Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+  let filteredBooks: Book[] = [];
+  let totalPages = 0;
+  let totalBooks = 0;
+  let booksUnavailable = false;
+  let booksErrorMessage = "";
 
-    return matchesCategory && matchesRating && matchesSearch;
-  });
+  try {
+    const booksResponse = await getBooks({
+      category: selectedCategory,
+      rating: selectedRating,
+      search: searchQuery,
+      page: currentPage,
+      limit: BOOKS_PER_PAGE,
+    });
+    filteredBooks = booksResponse.data;
+    totalPages = booksResponse.meta.totalPages;
+    totalBooks = booksResponse.meta.total;
+  } catch (error) {
+    booksUnavailable = true;
+    booksErrorMessage = getApiErrorMessage(error);
+  }
   const pageTitle = searchQuery
     ? `Search results for "${searchQuery}"`
-    : selectedCategory ?? "Book List";
+    : (selectedCategory ?? "Book List");
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-[1160px] flex-col px-5 pt-7 pb-10 font-outfit text-palette-slate-50 sm:px-8">
       <AppNav />
 
-      <h1 className="pt-8 text-[30px] leading-9 font-extrabold">
-        {pageTitle}
-      </h1>
+      <h1 className="pt-8 text-[30px] leading-9 font-extrabold">{pageTitle}</h1>
 
       <div className="grid items-start gap-6 pt-5 lg:grid-cols-[246px_1fr]">
         <BookFilterCard
@@ -300,17 +391,64 @@ export default async function BookListPage({ searchParams }: BookListPageProps) 
           searchQuery={searchQuery}
         />
 
-        <section className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
-          {filteredBooks.length > 0 ? (
-            filteredBooks.map((book) => <BookCard key={book.id} {...book} />)
-          ) : (
-            <Card className="rounded-[24px] border border-palette-indigo-300-20 bg-gray-200 p-0 py-0 shadow-none ring-0 sm:col-span-2 xl:col-span-3">
-              <CardContent className="px-6 py-8 text-sm leading-6 text-palette-slate-400">
-                No books match your search yet.
-              </CardContent>
-            </Card>
-          )}
-        </section>
+        <div>
+          <section className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {booksUnavailable ? (
+              <CatalogUnavailable
+                title="Daftar buku belum dapat dimuat"
+                message={booksErrorMessage}
+                className="sm:col-span-2 lg:col-span-3 xl:col-span-5"
+              />
+            ) : filteredBooks.length > 0 ? (
+              filteredBooks.map((book) => <BookCard key={book.id} {...book} />)
+            ) : (
+              <Card className="rounded-[24px] border border-palette-indigo-300-20 bg-gray-200 p-0 py-0 shadow-none ring-0 sm:col-span-2 lg:col-span-3 xl:col-span-5">
+                <CardContent className="px-6 py-8 text-sm leading-6 text-palette-slate-400">
+                  No books match your search yet.
+                </CardContent>
+              </Card>
+            )}
+          </section>
+
+          {!booksUnavailable && totalPages > 1 ? (
+            <nav
+              aria-label="Book list pagination"
+              className="flex flex-wrap items-center justify-center gap-2 pt-8"
+            >
+              {currentPage > 1 ? (
+                <Link
+                  href={buildBookListHref({
+                    category: selectedCategory,
+                    rating: selectedRating,
+                    search: searchQuery,
+                    page: currentPage - 1,
+                  })}
+                  className="pagination-button"
+                >
+                  Previous
+                </Link>
+              ) : null}
+
+              <span className="px-3 text-sm text-palette-slate-400">
+                Page {currentPage} of {totalPages} · {totalBooks} books
+              </span>
+
+              {currentPage < totalPages ? (
+                <Link
+                  href={buildBookListHref({
+                    category: selectedCategory,
+                    rating: selectedRating,
+                    search: searchQuery,
+                    page: currentPage + 1,
+                  })}
+                  className="pagination-button pagination-button--primary"
+                >
+                  More
+                </Link>
+              ) : null}
+            </nav>
+          ) : null}
+        </div>
       </div>
 
       <div className="pt-14">

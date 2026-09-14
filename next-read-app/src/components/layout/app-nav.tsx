@@ -1,73 +1,68 @@
 "use client";
-
-import { useMemo, useSyncExternalStore } from "react";
-
+import { useEffect, useState } from "react";
+import { useCart } from "@/components/providers/cart-provider";
 import { GuestNav } from "@/components/layout/guest-nav";
 import { UserNav } from "@/components/layout/user-nav";
-import type { NavigationUser } from "@/types/user-nav";
-
-type StoredUser = {
-  name: string;
-  email: string;
-};
-
-const getInitials = (name: string) => {
-  const initials = name
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((part) => part[0])
-    .join("")
-    .toUpperCase();
-
-  return initials || "U";
-};
-
-const subscribeToStorage = (onStoreChange: () => void) => {
-  window.addEventListener("storage", onStoreChange);
-
-  return () => {
-    window.removeEventListener("storage", onStoreChange);
-  };
-};
-
-const getUserSnapshot = () => {
-  const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
-
-  if (!isLoggedIn) {
-    return null;
-  }
-
-  return localStorage.getItem("currentUser");
-};
-
-const getServerSnapshot = () => null;
+import { useToast } from "@/components/providers/app-feedback-provider";
+import { AUTH_CHANGED_EVENT, type SessionUser } from "@/lib/auth";
 
 export function AppNav() {
-  const userSnapshot = useSyncExternalStore(
-    subscribeToStorage,
-    getUserSnapshot,
-    getServerSnapshot,
-  );
-
-  const user = useMemo<NavigationUser | null>(() => {
-    if (!userSnapshot) {
-      return null;
-    }
-
-    try {
-      const parsedUser = JSON.parse(userSnapshot) as StoredUser;
-
-      return {
-        name: parsedUser.name,
-        initials: getInitials(parsedUser.name),
-      };
-    } catch {
-      localStorage.removeItem("isLoggedIn");
-      localStorage.removeItem("currentUser");
-      return null;
-    }
-  }, [userSnapshot]);
-
-  return user ? <UserNav user={user} /> : <GuestNav />;
+  const [user, setUser] = useState<SessionUser | null>(null);
+  const { items } = useCart();
+  const cartCount = items.length;
+  const toast = useToast();
+  useEffect(() => {
+    let controller: AbortController | undefined;
+    const update = async () => {
+      controller?.abort();
+      controller = new AbortController();
+      const signal = controller.signal;
+      try {
+        const response = await fetch("/api/auth/session", {
+          cache: "no-store",
+          signal,
+        });
+        const body = await response.json();
+        if (!signal.aborted) {
+          if (response.ok) setUser(body.user);
+          else if (response.status === 401) setUser(null);
+          else {
+            toast({
+              title: "Status akun belum dapat diperiksa",
+              description: body.message,
+              variant: "error",
+            });
+          }
+        }
+      } catch {
+        if (!signal.aborted) {
+          toast({
+            title: "Koneksi terputus",
+            description:
+              "Status akun akan diperiksa kembali saat halaman dimuat ulang.",
+            variant: "error",
+          });
+        }
+      }
+    };
+    // Discard legacy mock credentials; only the backend session determines login.
+    for (const key of ["registeredUser", "isLoggedIn", "currentUser"])
+      localStorage.removeItem(key);
+    void update();
+    window.addEventListener(AUTH_CHANGED_EVENT, update);
+    return () => {
+      controller?.abort();
+      window.removeEventListener(AUTH_CHANGED_EVENT, update);
+    };
+  }, [toast]);
+  if (!user) return <GuestNav />;
+  const initials =
+    user.fullName
+      .trim()
+      .split(/\s+/)
+      .slice(0, 2)
+      .map((part) => part[0])
+      .join("")
+      .toUpperCase() || "U";
+  return <UserNav user={{ name: user.fullName, initials }} cartCount={cartCount} />;
 }

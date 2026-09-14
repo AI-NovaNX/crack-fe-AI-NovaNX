@@ -30,8 +30,7 @@ const heroSlides: HeroSlide[] = [
     title: "New arrivals",
     subtitle: "120+ new collections",
     actionLabel: "Reserve",
-    accentClassName:
-      "bg-[linear-gradient(90deg,_#53eafd,_#a684ff,_#4ddeff)]",
+    accentClassName: "bg-[linear-gradient(90deg,_#53eafd,_#a684ff,_#4ddeff)]",
   },
   {
     image: sourceImageTwo,
@@ -40,8 +39,7 @@ const heroSlides: HeroSlide[] = [
     title: "Reader favorites",
     subtitle: "Curated weekly by NexRead",
     actionLabel: "Browse",
-    accentClassName:
-      "bg-[linear-gradient(90deg,_#4ddeff,_#55d6ff,_#7c5cff)]",
+    accentClassName: "bg-[linear-gradient(90deg,_#4ddeff,_#55d6ff,_#7c5cff)]",
   },
   {
     image: sourceImageThree,
@@ -50,8 +48,7 @@ const heroSlides: HeroSlide[] = [
     title: "AI reading club",
     subtitle: "Saturday, 07:00 PM",
     actionLabel: "Join",
-    accentClassName:
-      "bg-[linear-gradient(90deg,_#7c5cff,_#c45bff,_#4ddeff)]",
+    accentClassName: "bg-[linear-gradient(90deg,_#7c5cff,_#c45bff,_#4ddeff)]",
   },
 ];
 
@@ -81,7 +78,7 @@ export function HeroSection() {
           )}
         />
         <div className="absolute top-[0.91px] left-[0.91px] right-[0.91px] h-[430px] flex flex-col items-start justify-between p-9 box-border gap-0 min-h-[430px]">
-          <div className="w-[148.8px] rounded-num-30504000 bg-gray-700 border-gray-600 border-solid border-[0.9px] box-border flex items-center py-2 px-num-16 gap-2">
+          <div className="w-[148.8px] rounded-num-30504000 bg-black/30 border-white/20 border-solid border-[0.9px] box-border flex items-center py-2 px-num-16 gap-2">
             <Image
               src={bookDropIcon}
               alt=""
@@ -90,17 +87,17 @@ export function HeroSection() {
               aria-hidden="true"
               className="h-4 w-4 relative shrink-0"
             />
-            <div className="relative tracking-[2.88px] leading-4 uppercase shrink-0 text-skyblue">
+            <div className="relative tracking-[2.88px] leading-4 uppercase shrink-0 text-[#4ddeff]">
               {activeSlide.eyebrow}
             </div>
           </div>
-          <div className="w-full flex flex-col items-start max-w-[576px] text-[96px] text-ghostwhite font-outfit">
+          <div className="w-full flex flex-col items-start max-w-[576px] text-[96px] text-white font-outfit">
             <div className="self-stretch flex flex-col items-start">
               <div className="relative leading-[91.2px] font-extrabold">
                 {activeSlide.title}
               </div>
             </div>
-            <div className="w-[576px] h-11 flex flex-col items-start pt-num-16 px-num-0 pb-num-0 box-border text-[20px] text-gray-500">
+            <div className="w-[576px] h-11 flex flex-col items-start pt-num-16 px-num-0 pb-num-0 box-border text-[20px] text-white/90">
               <div className="relative leading-7 font-semibold">
                 {activeSlide.subtitle}
               </div>
@@ -108,7 +105,7 @@ export function HeroSection() {
             <div className="self-stretch h-[72px] relative text-center text-[16px] text-gray-100">
               <Button
                 type="button"
-                className="absolute top-[23.99px] left-[0px] shadow-[0px_10px_15px_-3px_rgba(0,_211,_243,_0.25),_0px_4px_6px_-4px_rgba(0,_211,_243,_0.25)] rounded-num-30504000 bg-skyblue h-12 flex items-center py-3 px-6 box-border gap-2 text-gray-100 hover:bg-skyblue/90"
+                className="absolute top-[23.99px] left-[0px] shadow-[0px_10px_15px_-3px_rgba(0,_211,_243,_0.25),_0px_4px_6px_-4px_rgba(0,_211,_243,_0.25)] rounded-num-30504000 bg-[#4ddeff] h-12 flex items-center py-3 px-6 box-border gap-2 text-[#06101c] hover:bg-[#8aebff]"
               >
                 <b className="relative leading-6">{activeSlide.actionLabel}</b>
                 <ChevronRight className="h-4 w-4 relative" aria-hidden="true" />
@@ -126,15 +123,15 @@ export function HeroSection() {
                 className={cn(
                   "h-2 relative rounded-num-30504000 transition-all",
                   activeSlideIndex === index
-                    ? "w-10 bg-skyblue"
-                    : "w-2 bg-gray-400 hover:bg-gray-500",
+                    ? "w-10 bg-[#4ddeff]"
+                    : "w-2 bg-white/50 hover:bg-white/90",
                 )}
               />
             ))}
           </div>
         </div>
       </Card>
-      <Card className="absolute top-[25px] right-0 h-[704px] w-[360px] gap-0 rounded-[40px] border-[1px] border-[#5f5d91]/70 bg-[#171b2a] px-8 py-8 font-outfit text-palette-slate-400 shadow-[0px_30px_90px_rgba(6,_10,_28,_0.42)] ring-0">
+      <Card className="absolute top-[25px] right-0 h-[704px] w-[360px] gap-0 rounded-[40px] border-[1px] border-[#5f5d91]/70 bg-card px-8 py-8 font-outfit text-palette-slate-400 shadow-[0px_30px_90px_rgba(6,_10,_28,_0.42)] ring-0">
         <div
           className="flex w-fit gap-[7px] text-[20px] leading-6 font-extrabold uppercase"
           aria-label="NEXRANK"
@@ -148,7 +145,11 @@ export function HeroSection() {
             ["N", "#C570FF"],
             ["K", "#ED6AFF"],
           ].map(([letter, color]) => (
-            <span key={`${letter}-${color}`} style={{ color }} aria-hidden="true">
+            <span
+              key={`${letter}-${color}`}
+              style={{ color }}
+              aria-hidden="true"
+            >
               {letter}
             </span>
           ))}
@@ -161,15 +162,13 @@ export function HeroSection() {
         <Card className="relative mt-6 h-[176px] w-full gap-0 rounded-[28px] border-0 bg-[linear-gradient(135deg,_#4ddeff_0%,_#2d8eff_48%,_#7659ff_100%)] p-6 py-5 text-white shadow-[0px_20px_55px_rgba(77,_222,_255,_0.2)] ring-0">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-[13px] leading-5 font-extrabold text-white/75">
+              <p className="text-[13px] leading-5 font-extrabold text-[#06101c]">
                 Level 7
               </p>
               <p className="pt-2 text-[40px] leading-[40px] font-extrabold">
                 840
               </p>
-              <p className="text-[34px] leading-[34px] font-extrabold">
-                XP
-              </p>
+              <p className="text-[34px] leading-[34px] font-extrabold">XP</p>
             </div>
 
             <div className="mt-9 flex size-16 items-center justify-center rounded-[20px] bg-white/20 text-[24px]">
@@ -188,12 +187,12 @@ export function HeroSection() {
             <div className="h-full w-[76%] rounded-full bg-white shadow-[0_0_12px_rgba(255,_255,_255,_0.55)]" />
           </div>
 
-          <p className="absolute right-6 bottom-3 left-6 text-[11px] leading-4 font-extrabold text-white/80">
+          <p className="absolute right-6 bottom-3 left-6 text-[11px] leading-4 font-extrabold text-[#06101c]">
             160 XP to next level
           </p>
         </Card>
 
-        <Card className="mt-5 h-[88px] w-full flex-row items-center justify-between rounded-[20px] border-[1px] border-[#4a5270] bg-[#151925] px-5 py-4 shadow-none ring-0">
+        <Card className="mt-5 h-[88px] w-full flex-row items-center justify-between rounded-[20px] border-[1px] border-[#4a5270] bg-card px-5 py-4 shadow-none ring-0">
           <div>
             <h3 className="text-[13px] leading-5 font-extrabold text-palette-slate-50">
               Weekly Quest
@@ -202,13 +201,13 @@ export function HeroSection() {
               Borrow 2 books this week
             </p>
           </div>
-          <div className="flex h-8 w-12 items-center justify-center rounded-full bg-palette-cyan-300 text-[12px] leading-4 font-extrabold text-black">
+          <div className="flex h-8 w-12 items-center justify-center rounded-full bg-palette-cyan-300 text-[12px] leading-4 font-extrabold text-white dark:text-black">
             1/2
           </div>
         </Card>
 
         <div className="mt-5 grid w-full grid-cols-2 gap-4">
-          <Card className="h-[132px] justify-center gap-0 rounded-[20px] border-[1px] border-[#4a5270] bg-[#151925] px-5 py-5 shadow-none ring-0">
+          <Card className="h-[132px] justify-center gap-0 rounded-[20px] border-[1px] border-[#4a5270] bg-card px-5 py-5 shadow-none ring-0">
             <div className="text-[25px] leading-8 font-extrabold text-palette-slate-50">
               🔥 4
             </div>
@@ -217,7 +216,7 @@ export function HeroSection() {
             </p>
           </Card>
 
-          <Card className="h-[132px] justify-center gap-0 rounded-[20px] border-[1px] border-[#4a5270] bg-[#151925] px-5 py-5 shadow-none ring-0">
+          <Card className="h-[132px] justify-center gap-0 rounded-[20px] border-[1px] border-[#4a5270] bg-card px-5 py-5 shadow-none ring-0">
             <div className="text-[25px] leading-8 font-extrabold text-palette-slate-50">
               🏅 12
             </div>
@@ -238,7 +237,7 @@ export function HeroSection() {
           </Card>
         </div>
 
-        <Card className="mt-5 h-[74px] w-full flex-row items-center gap-4 rounded-full border-[1px] border-[#655c91] bg-[#2e3040] px-5 py-3 shadow-[inset_0_0_0_1px_rgba(255,_255,_255,_0.04)] ring-0">
+        <Card className="mt-5 h-[74px] w-full flex-row items-center gap-4 rounded-full border-[1px] border-[#655c91] bg-card px-5 py-3 shadow-[inset_0_0_0_1px_rgba(255,_255,_255,_0.04)] ring-0">
           <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#894cff] text-[20px] text-white">
             ★
           </span>

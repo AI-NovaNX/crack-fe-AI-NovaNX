@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { AuthLogo } from "@/components/shared/auth/auth-logo";
 import { pageBackgroundClassName } from "@/lib/page-background";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "@/components/layout/theme-toggle";
 
 type AuthPageShellProps = {
   title: string;
@@ -16,7 +17,10 @@ export function AuthPageShell({
   children,
 }: AuthPageShellProps) {
   return (
-    <main className={cn(pageBackgroundClassName, "font-outfit text-foreground")}>
+    <main
+      className={cn(pageBackgroundClassName, "font-outfit text-foreground")}
+    >
+      <div className="absolute right-5 top-5"><ThemeToggle /></div>
       <section className="mx-auto flex min-h-screen w-full max-w-[1280px] items-center justify-center px-6 py-12">
         <div className="grid w-full max-w-5xl items-center gap-10 lg:grid-cols-[1fr_460px]">
           <aside className="hidden flex-col gap-6 lg:flex">

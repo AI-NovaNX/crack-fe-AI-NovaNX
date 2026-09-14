@@ -14,14 +14,14 @@ searching books, and opening author-specific book pages.
 - shadcn/ui components
 - lucide-react icons
 - React Hook Form for auth form handling
-- Local mock data for books and authors
+- Railway staging API for books, authors, categories, and authentication
 
 ## Current Features
 
 - Authentication pages for login and registration.
 - Shared user header with NexRead logo, search form, cart action,
   notification action, profile action, and dark/light theme toggle.
-- Header search redirects to `/book-list?search=...` and filters books by
+- Header search waits 400 ms after typing, then updates `/book-list?search=...`; Enter or Search submits immediately. Existing category/rating filters are preserved. It filters books by
   title, author, or category.
 - Home page sections:
   - Hero section
@@ -37,9 +37,10 @@ searching books, and opening author-specific book pages.
   - Shared book card styling
 - Popular Authors cards link to author detail pages.
 - Author detail page shows author summary and books by selected author.
-- Mock author data includes author id, name, book count, borrow count, rating,
+- Author API data includes author id, name, book count, borrow count, rating,
   and avatar asset.
-- Mock book data includes title, author, category, rating, and cover gradient.
+- Book API data includes title, author, category, rating, and cover gradient.
+- Category API data includes category id, name, slug, subtitle, and icon path.
 
 ## Getting Started
 
@@ -104,25 +105,66 @@ src/
 │   ├── layout/
 │   ├── shared/
 │   └── ui/
-├── data/
-│   ├── mock-authors.ts
-│   └── mock-books.ts
 ├── lib/
 ├── services/
+│   ├── authors.ts
+│   ├── books.ts
+│   └── categories.ts
 ├── types/
 └── utils/
 ```
 
-## Data Notes
+## Backend integration
 
-The app currently uses mock data in `src/data`.
+Copy `.env.example` to `.env.local` before starting the app:
 
-- `mock-books.ts` is used by Recommended for You, Book List, search, category
-  filters, rating filters, and author book pages.
-- `mock-authors.ts` is used by Popular Authors and author detail pages.
+```bash
+cp .env.example .env.local
+npm run dev
+```
 
-When the backend API is ready, these data sources can be replaced with fetchers
-or service functions while keeping most UI components intact.
+The default targets the staging backend:
+
+```env
+NEXT_PUBLIC_API_BASE_URL=https://crack-be-ai-novanx-staging.up.railway.app
+```
+
+Restart the dev server after changing the URL. For deployment, set this variable
+on the hosting platform before building. The base URL has no `/api` suffix:
+`/api` on the backend hosts Swagger; catalog endpoints use `/books`, `/authors`,
+and `/categories`. Cart endpoints, when integrated, use `/api/cart`.
+
+Catalog services use the Next.js Data Cache with a 60-second revalidation window
+and map nested backend author/category objects into the UI types. Read requests
+retry transient network failures twice. Home sections and the Book List show an
+inline retry state when neither live nor cached data is available, so navigation
+and the rest of the page remain usable. Known avatar/icon paths map
+to bundled assets; unknown paths use a generic local fallback. No mock records
+are used as a fallback for API failures. User routes have loading/error states.
+
+Category names in existing links resolve to backend category IDs. Search still
+matches title, author and category, and rating filters still match integer rating
+groups. Those filters read all matching backend pages before filtering because
+the backend currently provides only title search and minimum rating. For larger
+catalogs, extend the backend search/rating contract to avoid this extra work.
+
+Authentication uses same-origin Next.js routes at `/api/auth/login`, `register`,
+`session`, and `logout`. Access/refresh tokens stay in HttpOnly, SameSite=Lax
+session cookies (Secure in production), never in localStorage or JSON responses
+to the browser. Session lookup checks `/me` and refreshes expired access tokens;
+logout revokes the backend refresh token. Mutation routes validate Origin.
+Registration sends `fullName`, `email`, and `password` and signs the user in.
+The phone field was removed because the backend registration contract has no
+phone property. Old mock account storage is cleared.
+
+Global UX feedback includes an offline banner, accessible inline form errors,
+loading skeletons, status-aware API messages, success/error toasts, route error
+boundaries, and a confirmation modal before logout. Ordinary network failures
+remain inline so they do not interrupt the user's work.
+
+Existing cart, checkout, loans, profile, reviews, admin and other placeholder
+pages still need their own UI/API implementation; connecting the catalog and
+authentication does not make those placeholder features functional.
 
 ## Styling Notes
 
@@ -140,4 +182,5 @@ or service functions while keeping most UI components intact.
 - Keep shared shadcn-style primitives in `components/ui`.
 - Put route-specific filtering state in search params when the result should be
   shareable or reload-safe.
-- Keep mock data in `src/data` until the backend integration is ready.
+- Keep API calls and response mapping in `src/services`.
+- Keep supported book cover styles in `src/lib/book-covers.ts` so Tailwind includes API-provided styles in the build.

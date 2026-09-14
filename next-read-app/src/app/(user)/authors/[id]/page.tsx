@@ -1,16 +1,16 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { ShoppingCart } from "lucide-react";
 
-import heartIcon from "@/assets/icons/heart.svg";
+import { FavoriteAuthorButton } from "@/components/shared/favorite-author-button";
+import { FavoriteButton } from "@/components/shared/favorite-button";
+import { CartButton } from "@/components/shared/cart-button";
 import bookIcon from "@/assets/icons/TrendingBook/Icon-1.svg";
 import starIcon from "@/assets/icons/TrendingBook/Icon.svg";
 import { AppNav } from "@/components/layout/app-nav";
 import { Footer } from "@/components/layout/footer";
 import { Card, CardContent } from "@/components/ui/card";
-import { mockAuthors } from "@/data/mock-authors";
-import { mockBooks } from "@/data/mock-books";
 import { cn } from "@/lib/utils";
+import { getAuthorBooks, getAuthorById } from "@/services/authors";
 import type { Author } from "@/types/author";
 import type { Book } from "@/types/book";
 
@@ -32,33 +32,47 @@ function formatBorrowCount(count: number) {
 function AuthorSummaryCard({ author }: { author: Author }) {
   return (
     <Card className="w-full rounded-[32px] border border-palette-indigo-300-20 bg-gray-200 p-0 py-0 text-palette-slate-50 shadow-[0px_25px_50px_-12px_rgba(0,_0,_0,_0.25)] ring-0">
-      <CardContent className="flex items-center gap-5 px-6 py-7 sm:px-8">
-        <div className="size-16 shrink-0 overflow-hidden rounded-full border border-palette-indigo-300-20 bg-palette-cyan-300-10 shadow-[0px_10px_15px_-3px_rgba(0,_184,_219,_0.25),_0px_4px_6px_-4px_rgba(0,_184,_219,_0.25)]">
-          <Image
-            src={author.avatar}
-            alt={`${author.name} avatar`}
-            className="size-full object-cover"
-            priority
-          />
+      <CardContent className="flex items-center justify-between gap-5 px-6 py-7 sm:px-8">
+        <div className="flex min-w-0 flex-1 items-center gap-5">
+          <div className="size-16 shrink-0 overflow-hidden rounded-full border border-palette-indigo-300-20 bg-palette-cyan-300-10 shadow-[0px_10px_15px_-3px_rgba(0,_184,_219,_0.25),_0px_4px_6px_-4px_rgba(0,_184,_219,_0.25)]">
+            <Image
+              src={author.avatar}
+              alt={`${author.name} avatar`}
+              className="size-full object-cover"
+              priority
+            />
+          </div>
+
+          <div className="min-w-0">
+            <h1 className="truncate text-xl leading-7 font-extrabold text-palette-slate-50">
+              {author.name}
+            </h1>
+            <p className="pt-2 text-sm leading-5 font-semibold text-palette-slate-400">
+              <span aria-hidden="true">📚</span> {author.booksCount} Books{" "}
+              <span className="text-palette-indigo-300-20">•</span>{" "}
+              <span aria-hidden="true">🔥</span>{" "}
+              {formatBorrowCount(author.borrowedBooksCount)} Borrows
+            </p>
+          </div>
         </div>
 
-        <div className="min-w-0">
-          <h1 className="truncate text-xl leading-7 font-extrabold text-palette-slate-50">
-            {author.name}
-          </h1>
-          <p className="pt-2 text-sm leading-5 font-semibold text-palette-slate-400">
-            <span aria-hidden="true">📚</span> {author.booksCount} Books{" "}
-            <span className="text-palette-indigo-300-20">•</span>{" "}
-            <span aria-hidden="true">🔥</span>{" "}
-            {formatBorrowCount(author.borrowedBooksCount)} Borrows
-          </p>
-        </div>
+        <FavoriteAuthorButton author={author} showLabel />
       </CardContent>
     </Card>
   );
 }
 
-function AuthorBookCard({ title, author, category, rating, coverClassName }: Book) {
+function AuthorBookCard({
+  id,
+  coverUrl,
+  title,
+  author,
+  category,
+  rating,
+  coverClassName,
+  availableCopies,
+  isAvailable,
+}: Book) {
   return (
     <Card className="h-[404px] rounded-[28px] border border-palette-indigo-300-20 bg-palette-slate-900-80 p-0 py-0 shadow-none ring-0 transition-all duration-200 hover:border-palette-cyan-300 hover:bg-gray-800">
       <CardContent className="flex h-full flex-col px-5 py-5">
@@ -96,20 +110,18 @@ function AuthorBookCard({ title, author, category, rating, coverClassName }: Boo
               <b className="text-sm leading-5">{rating.toFixed(1)}</b>
             </div>
             <div className="flex items-center gap-2">
-              <span className="flex size-9 shrink-0 items-center justify-center rounded-full border border-palette-indigo-300-20 bg-gray-200">
-                <ShoppingCart
-                  className="size-4 text-palette-slate-50"
-                  aria-hidden="true"
-                />
-              </span>
-              <span className="flex size-9 shrink-0 items-center justify-center rounded-full border border-palette-indigo-300-20 bg-gray-200">
-                <Image
-                  src={heartIcon}
-                  alt=""
-                  className="size-4"
-                  aria-hidden="true"
-                />
-              </span>
+              <CartButton book={{ id, title, availableCopies, isAvailable }} />
+              <FavoriteButton
+                book={{
+                  id,
+                  title,
+                  author,
+                  category,
+                  rating,
+                  coverUrl,
+                  coverClassName,
+                }}
+              />
             </div>
           </div>
         </div>
@@ -122,13 +134,13 @@ export default async function AuthorDetailPage({
   params,
 }: AuthorDetailPageProps) {
   const { id } = await params;
-  const author = mockAuthors.find((item) => item.id === id);
+  const author = await getAuthorById(id);
 
   if (!author) {
     notFound();
   }
 
-  const authorBooks = mockBooks.filter((book) => book.author === author.name);
+  const authorBooks = (await getAuthorBooks(id, 1, 100)).data;
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-[1160px] flex-col px-5 pt-7 pb-10 font-outfit text-palette-slate-50 sm:px-8">

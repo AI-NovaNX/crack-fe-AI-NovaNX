@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { submitAuth } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { AuthFormField } from "@/components/shared/auth/auth-form-field";
 import { AuthPageShell } from "@/components/shared/auth/auth-page-shell";
+import { useToast } from "@/components/providers/app-feedback-provider";
 import { Button } from "@/components/ui/button";
 import type { LoginFormValues } from "@/types/auth";
 
@@ -15,15 +17,9 @@ const initialFormValues: LoginFormValues = {
   password: "",
 };
 
-type StoredRegisteredUser = {
-  name: string;
-  email: string;
-  phone: string;
-  password: string;
-};
-
 export default function LoginPage() {
   const router = useRouter();
+  const toast = useToast();
   const [showPassword, setShowPassword] = useState(false);
   const {
     register,
@@ -36,42 +32,32 @@ export default function LoginPage() {
     reValidateMode: "onChange",
   });
 
-  const onSubmit = (values: LoginFormValues) => {
-    const savedUser = localStorage.getItem("registeredUser");
-
-    if (!savedUser) {
+  const onSubmit = async (values: LoginFormValues) => {
+    clearErrors("root");
+    try {
+      await submitAuth("login", values);
+      toast({
+        title: "Berhasil masuk",
+        description: "Selamat datang kembali.",
+      });
+      router.push("/");
+      router.refresh();
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Unable to sign in.";
       setError("root", {
         type: "server",
-        message: "Please register an account before logging in.",
+        message,
       });
-
-      return;
+      toast({ title: "Gagal masuk", description: message, variant: "error" });
     }
+  };
 
-    const registeredUser = JSON.parse(savedUser) as StoredRegisteredUser;
-    const isValidUser =
-      registeredUser.email === values.email &&
-      registeredUser.password === values.password;
-
-    if (isValidUser) {
-      localStorage.setItem("isLoggedIn", "true");
-      localStorage.setItem(
-        "currentUser",
-        JSON.stringify({
-          name: registeredUser.name,
-          email: registeredUser.email,
-        }),
-      );
-
-      router.push("/");
-      return;
-    }
-
-    localStorage.removeItem("isLoggedIn");
-    localStorage.removeItem("currentUser");
-    setError("root", {
-      type: "server",
-      message: "The email or password is incorrect.",
+  const onInvalid = () => {
+    toast({
+      title: "Form belum lengkap",
+      description: "Periksa kembali email dan password Anda.",
+      variant: "error",
     });
   };
 
@@ -82,7 +68,7 @@ export default function LoginPage() {
     >
       <form
         className="flex flex-col gap-4"
-        onSubmit={handleSubmit(onSubmit)}
+        onSubmit={handleSubmit(onSubmit, onInvalid)}
         noValidate
       >
         <AuthFormField
@@ -128,7 +114,7 @@ export default function LoginPage() {
           disabled={isSubmitting}
           className="h-12 w-full rounded-num-30504000 text-base font-extrabold shadow-[0px_10px_15px_-3px_rgba(0,_211,_243,_0.25),_0px_4px_6px_-4px_rgba(0,_211,_243,_0.25)]"
         >
-          Login
+          {isSubmitting ? "Signing in..." : "Login"}
         </Button>
 
         <p className="text-center text-base font-semibold text-muted-foreground">
