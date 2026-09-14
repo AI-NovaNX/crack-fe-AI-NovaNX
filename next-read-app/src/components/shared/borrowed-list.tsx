@@ -1,14 +1,16 @@
 "use client";
 
-import Image from "next/image";
+import { AnimatedBook, BookHoverCard } from "@/components/shared/animated-book";
 import Link from "next/link";
 import { Search, Star } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { CatalogUnavailable } from "@/components/shared/catalog-unavailable";
 import { ReviewModal } from "@/components/shared/review-modal";
+import { ProfileContent } from "@/components/shared/profile-content";
 import { getBookCoverUrl } from "@/lib/book-covers";
 import { cn } from "@/lib/utils";
+import { getBookDetail } from "@/services/books";
 import type { Book } from "@/types/book";
 
 type LoanStatus = "active" | "returned" | "overdue";
@@ -28,6 +30,18 @@ const statuses: Array<{ label: string; value: "all" | LoanStatus }> = [
   { label: "Overdue", value: "overdue" },
 ];
 const ITEMS_PER_PAGE = 3;
+
+type ReviewItem = {
+  id: string;
+  date: string;
+  title: string;
+  author: string;
+  category: string;
+  rating: number;
+  comment: string;
+  coverUrl?: string;
+  coverClassName: string;
+};
 
 function asString(value: unknown) {
   return typeof value === "string" && value ? value : null;
@@ -99,6 +113,53 @@ function statusLabel(status: LoanStatus) {
   return status[0].toUpperCase() + status.slice(1);
 }
 
+function ReviewCard({ review }: { review: ReviewItem }) {
+  return (
+    <BookHoverCard as="article" unstyled className="rounded-[22px] border border-palette-indigo-300-20 bg-secondary p-4 shadow-[0_10px_24px_-18px_#000] sm:p-5">
+      <div className="flex items-start gap-4">
+        <div className="w-[72px] shrink-0 sm:w-[88px]"><AnimatedBook {...review} compact /></div>
+
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="text-[9px] font-bold uppercase tracking-[0.12em] text-palette-slate-400">
+                {review.date}
+              </p>
+              <h2 className="mt-1 text-lg font-extrabold text-palette-slate-50">
+                {review.title}
+              </h2>
+            </div>
+            <span className="inline-flex w-fit rounded-full bg-cyan-400/15 px-2.5 py-1 text-[9px] font-bold text-cyan-700 dark:text-cyan-300">
+              {review.category}
+            </span>
+          </div>
+
+          <p className="mt-2 text-xs font-semibold text-palette-slate-400">
+            {review.author}
+          </p>
+
+          <div className="mt-3 flex items-center gap-1 text-amber-400">
+            {Array.from({ length: 5 }).map((_, index) => (
+              <Star
+                key={`${review.id}-star-${index}`}
+                className={cn(
+                  "size-3.5 fill-current",
+                  index < review.rating ? "text-amber-400" : "text-white/20",
+                )}
+                aria-hidden="true"
+              />
+            ))}
+          </div>
+
+          <p className="mt-3 text-sm leading-6 text-palette-slate-300">
+            {review.comment}
+          </p>
+        </div>
+      </div>
+    </BookHoverCard>
+  );
+}
+
 function LoanCard({
   loan,
   reviewed,
@@ -109,7 +170,7 @@ function LoanCard({
   onReview: () => void;
 }) {
   return (
-    <article className="overflow-hidden rounded-[18px] border border-palette-indigo-300-20 bg-card shadow-[0_10px_24px_-18px_#000]">
+    <BookHoverCard as="article" unstyled className="overflow-hidden rounded-[18px] border border-palette-indigo-300-20 bg-card shadow-[0_10px_24px_-18px_#000]">
       <div className="flex items-center justify-between border-b border-palette-indigo-300-20 px-3 py-2 text-[9px] font-extrabold sm:px-4">
         <span>
           Status{" "}
@@ -134,26 +195,7 @@ function LoanCard({
         </span>
       </div>
       <div className="flex items-center gap-3 px-3 py-3 sm:px-4 sm:py-4">
-        <div
-          className={cn(
-            "relative h-[70px] w-[50px] shrink-0 overflow-hidden rounded-xl",
-            loan.book.coverClassName,
-          )}
-        >
-          {loan.book.coverUrl ? (
-            <Image
-              src={loan.book.coverUrl}
-              alt={`Cover ${loan.book.title}`}
-              fill
-              unoptimized
-              className="object-cover"
-            />
-          ) : (
-            <div className="flex h-full items-end p-1.5 text-[8px] font-extrabold text-white">
-              {loan.book.title}
-            </div>
-          )}
-        </div>
+        <div className="w-[60px] shrink-0 sm:w-[72px]"><AnimatedBook {...loan.book} compact /></div>
         <div className="min-w-0 flex-1">
           <span className="rounded-full bg-cyan-400/15 px-2 py-0.5 text-[8px] font-bold text-cyan-700 dark:text-cyan-300">
             {loan.book.category}
@@ -183,7 +225,7 @@ function LoanCard({
           {reviewed ? "Reviewed" : "Give Review"}
         </button>
       </div>
-    </article>
+    </BookHoverCard>
   );
 }
 
@@ -200,6 +242,13 @@ export function BorrowedList() {
   const [reviewedLoanIds, setReviewedLoanIds] = useState<Set<Loan["id"]>>(
     new Set(),
   );
+  const [activeTab, setActiveTab] = useState<"profile" | "borrowed" | "reviews">(
+    "borrowed",
+  );
+  const [reviewQuery, setReviewQuery] = useState("");
+  const [reviewEntries, setReviewEntries] = useState<ReviewItem[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [reviewsError, setReviewsError] = useState("");
 
   useEffect(() => {
     const controller = new AbortController();
@@ -254,6 +303,73 @@ export function BorrowedList() {
   );
   const visibleLoans = filteredLoans.slice(0, visibleCount);
 
+  useEffect(() => {
+    if (activeTab !== "reviews" || loans.length === 0) {
+      return;
+    }
+
+    let isMounted = true;
+
+    async function loadReviews() {
+      setReviewsLoading(true);
+      setReviewsError("");
+
+      try {
+        const reviewGroups = await Promise.all(
+          loans.map(async (loan) => {
+            const bookDetail = await getBookDetail(loan.book.id);
+            if (!bookDetail?.reviews?.length) return [];
+
+            return bookDetail.reviews.map((review) => ({
+              id: String(review.id),
+              date: formatDate(review.createdAt),
+              title: bookDetail.title,
+              author: bookDetail.author,
+              category: bookDetail.category,
+              rating: review.rating,
+              comment: review.comment || "No comment provided.",
+              coverUrl: bookDetail.coverUrl,
+              coverClassName: bookDetail.coverClassName,
+            }));
+          }),
+        );
+
+        if (!isMounted) return;
+
+        setReviewEntries(reviewGroups.flat());
+      } catch (loadError) {
+        if (!isMounted) return;
+        setReviewsError(
+          loadError instanceof Error
+            ? loadError.message
+            : "Review belum dapat dimuat.",
+        );
+        setReviewEntries([]);
+      } finally {
+        if (isMounted) setReviewsLoading(false);
+      }
+    }
+
+    void loadReviews();
+    return () => {
+      isMounted = false;
+    };
+  }, [activeTab, loans]);
+
+  const filteredReviews = useMemo(() => {
+    const normalizedQuery = reviewQuery.trim().toLowerCase();
+
+    if (!normalizedQuery) return reviewEntries;
+
+    return reviewEntries.filter(
+      (review) =>
+        review.title.toLowerCase().includes(normalizedQuery) ||
+        review.author.toLowerCase().includes(normalizedQuery) ||
+        review.category.toLowerCase().includes(normalizedQuery),
+    );
+  }, [reviewEntries, reviewQuery]);
+
+  function renderLoanStatus() {
   if (status === "loading")
     return (
       <div
@@ -283,82 +399,153 @@ export function BorrowedList() {
       </section>
     );
 
+    return null;
+  }
+
   return (
     <div className="mx-auto w-full max-w-[860px]">
       <nav
         aria-label="Profile navigation"
         className="mx-auto flex max-w-[250px] items-center justify-between rounded-full border border-border bg-secondary p-1 text-[9px] text-palette-slate-400"
       >
-        <Link href="/profile" className="rounded-full px-4 py-1.5">
-          Profile
-        </Link>
-        <span className="rounded-full bg-accent px-4 py-1.5 font-extrabold text-foreground">
-          Borrowed List
-        </span>
-        <Link href="/reviews" className="rounded-full px-4 py-1.5">
-          Reviews
-        </Link>
-      </nav>
-      <h1 className="mt-5 text-xl font-extrabold sm:text-2xl">Borrowed List</h1>
-      <div className="relative mt-3 max-w-[250px]">
-        <Search
-          className="absolute top-1/2 left-3 size-3 -translate-y-1/2 text-cyan-700 dark:text-cyan-300"
-          aria-hidden="true"
-        />
-        <input
-          value={query}
-          onChange={(event) => {
-            setQuery(event.target.value);
-            setVisibleCount(ITEMS_PER_PAGE);
-          }}
-          placeholder="Search book"
-          aria-label="Search borrowed books"
-          className="h-7 w-full rounded-full border border-border bg-secondary px-8 text-[9px] text-foreground outline-none placeholder:text-palette-slate-400 focus-visible:ring-2 focus-visible:ring-cyan-300"
-        />
-      </div>
-      <div className="mt-2 flex flex-wrap gap-2">
-        {statuses.map((item) => (
-          <button
-            key={item.value}
-            type="button"
-            onClick={() => {
-              setFilter(item.value);
-              setVisibleCount(ITEMS_PER_PAGE);
-            }}
-            className={cn(
-              "rounded-full border border-border bg-secondary px-3 py-1 text-[9px] font-bold text-palette-slate-400",
-              filter === item.value && "bg-cyan-300 text-[#06101c]",
-            )}
-          >
-            {item.label}
-          </button>
-        ))}
-      </div>
-      {visibleLoans.length ? (
-        <div className="mt-3 space-y-2">
-          {visibleLoans.map((loan) => (
-            <LoanCard
-              key={loan.id}
-              loan={loan}
-              reviewed={reviewedLoanIds.has(loan.id)}
-              onReview={() => setReviewBook(loan.book)}
-            />
-          ))}
-        </div>
-      ) : (
-        <div className="mt-4 rounded-[18px] border border-border bg-secondary p-8 text-center text-xs text-palette-slate-400">
-          No borrowed books found.
-        </div>
-      )}
-      {filteredLoans.length > visibleLoans.length && (
         <button
           type="button"
-          onClick={() => setVisibleCount((count) => count + ITEMS_PER_PAGE)}
-          className="mx-auto mt-4 block rounded-full border border-border bg-secondary px-5 py-2 text-[9px] font-bold text-foreground hover:bg-secondary"
+          onClick={() => setActiveTab("profile")}
+          aria-pressed={activeTab === "profile"}
+          className={cn(
+            "rounded-full px-4 py-1.5",
+            activeTab === "profile" && "bg-accent font-extrabold text-foreground",
+          )}
         >
-          Load More
+          Profile
         </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab("borrowed")}
+          className={cn(
+            "rounded-full px-4 py-1.5",
+            activeTab === "borrowed" && "bg-accent font-extrabold text-foreground",
+          )}
+        >
+          Borrowed List
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab("reviews")}
+          className={cn(
+            "rounded-full px-4 py-1.5",
+            activeTab === "reviews" && "bg-accent font-extrabold text-foreground",
+          )}
+        >
+          Reviews
+        </button>
+      </nav>
+
+      {activeTab === "profile" ? <ProfileContent /> : activeTab === "borrowed" && status !== "ready" ? renderLoanStatus() : activeTab === "borrowed" ? (
+        <>
+          <h1 className="mt-5 text-xl font-extrabold sm:text-2xl">
+            Borrowed List
+          </h1>
+          <div className="relative mt-3 max-w-[250px]">
+            <Search
+              className="absolute top-1/2 left-3 size-3 -translate-y-1/2 text-cyan-700 dark:text-cyan-300"
+              aria-hidden="true"
+            />
+            <input
+              value={query}
+              onChange={(event) => {
+                setQuery(event.target.value);
+                setVisibleCount(ITEMS_PER_PAGE);
+              }}
+              placeholder="Search book"
+              aria-label="Search borrowed books"
+              className="h-7 w-full rounded-full border border-border bg-secondary px-8 text-[9px] text-foreground outline-none placeholder:text-palette-slate-400 focus-visible:ring-2 focus-visible:ring-cyan-300"
+            />
+          </div>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {statuses.map((item) => (
+              <button
+                key={item.value}
+                type="button"
+                onClick={() => {
+                  setFilter(item.value);
+                  setVisibleCount(ITEMS_PER_PAGE);
+                }}
+                className={cn(
+                  "rounded-full border border-border bg-secondary px-3 py-1 text-[9px] font-bold text-palette-slate-400",
+                  filter === item.value && "bg-cyan-300 text-[#06101c]",
+                )}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+          {visibleLoans.length ? (
+            <div className="mt-3 space-y-2">
+              {visibleLoans.map((loan) => (
+                <LoanCard
+                  key={loan.id}
+                  loan={loan}
+                  reviewed={reviewedLoanIds.has(loan.id)}
+                  onReview={() => setReviewBook(loan.book)}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="mt-4 rounded-[18px] border border-border bg-secondary p-8 text-center text-xs text-palette-slate-400">
+              No borrowed books found.
+            </div>
+          )}
+          {filteredLoans.length > visibleLoans.length && (
+            <button
+              type="button"
+              onClick={() => setVisibleCount((count) => count + ITEMS_PER_PAGE)}
+              className="mx-auto mt-4 block rounded-full border border-border bg-secondary px-5 py-2 text-[9px] font-bold text-foreground hover:bg-secondary"
+            >
+              Load More
+            </button>
+          )}
+        </>
+      ) : (
+        <>
+          <h1 className="mt-5 text-xl font-extrabold sm:text-2xl">Reviews</h1>
+
+          <div className="relative mt-3 max-w-[250px]">
+            <Search
+              className="absolute top-1/2 left-3 size-3 -translate-y-1/2 text-cyan-700 dark:text-cyan-300"
+              aria-hidden="true"
+            />
+            <input
+              value={reviewQuery}
+              onChange={(event) => setReviewQuery(event.target.value)}
+              placeholder="Search reviews"
+              aria-label="Search reviews"
+              className="h-7 w-full rounded-full border border-border bg-secondary px-8 text-[9px] text-foreground outline-none placeholder:text-palette-slate-400 focus-visible:ring-2 focus-visible:ring-cyan-300"
+            />
+          </div>
+
+          <section className="mt-6 space-y-4">
+            {reviewsLoading ? (
+              <div className="rounded-[22px] border border-border bg-secondary px-5 py-8 text-center text-sm text-palette-slate-400">
+                Memuat review...
+              </div>
+            ) : reviewsError ? (
+              <div className="rounded-[22px] border border-border bg-secondary px-5 py-8 text-center text-sm text-palette-slate-400">
+                {reviewsError}
+              </div>
+            ) : filteredReviews.length > 0 ? (
+              filteredReviews.map((review) => (
+                <ReviewCard key={review.id} review={review} />
+              ))
+            ) : (
+              <div className="rounded-[22px] border border-border bg-secondary px-5 py-8 text-center text-sm text-palette-slate-400">
+                Tidak ada review yang cocok dengan pencarian Anda.
+              </div>
+            )}
+          </section>
+        </>
       )}
+
       {reviewBook ? (
         <ReviewModal
           book={reviewBook}

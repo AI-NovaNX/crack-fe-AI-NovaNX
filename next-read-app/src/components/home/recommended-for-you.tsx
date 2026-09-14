@@ -3,9 +3,9 @@ import Link from "next/link";
 
 import { FavoriteButton } from "@/components/shared/favorite-button";
 import { CartButton } from "@/components/shared/cart-button";
-import bookIcon from "@/assets/icons/TrendingBook/Icon-1.svg";
+import { AnimatedBook, BookHoverCard } from "@/components/shared/animated-book";
 import starIcon from "@/assets/icons/TrendingBook/Icon.svg";
-import { Card, CardContent } from "@/components/ui/card";
+import { CardContent } from "@/components/ui/card";
 import { CatalogUnavailable } from "@/components/shared/catalog-unavailable";
 import { getApiErrorMessage } from "@/lib/error-message";
 import { getRecommendedBooks } from "@/services/books";
@@ -23,34 +23,9 @@ function RecommendedBookCard({
   isAvailable,
 }: Book) {
   return (
-    <Card className="relative h-full rounded-[28px] border border-palette-indigo-300-20 bg-palette-slate-900-80 p-0 py-0 font-outfit shadow-none ring-0 transition-all duration-200 hover:border-palette-cyan-300 hover:bg-gray-800">
+    <BookHoverCard className="relative h-full rounded-[28px] border border-palette-indigo-300-20 bg-palette-slate-900-80 p-0 py-0 font-outfit shadow-none ring-0 transition-all duration-200 hover:border-palette-cyan-300 hover:bg-gray-800">
       <CardContent className="flex h-full flex-col px-5 py-5">
-        <div
-          className={`relative aspect-[2/3] w-full overflow-hidden rounded-[18px] shadow-[0px_10px_15px_-3px_rgba(0,_0,_0,_0.3),_0px_4px_6px_-4px_rgba(0,_0,_0,_0.3)] ${coverClassName}`}
-        >
-          {coverUrl ? (
-            <Image
-              src={coverUrl}
-              alt={`Cover ${title}`}
-              fill
-              unoptimized
-              sizes="(min-width: 1280px) 200px, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-              className="object-cover"
-            />
-          ) : (
-            <div className="flex h-full flex-col justify-between p-5">
-              <Image
-                src={bookIcon}
-                alt=""
-                className="size-7"
-                aria-hidden="true"
-              />
-              <h3 className="max-w-[150px] text-[22px] leading-6 font-extrabold text-white">
-                {title}
-              </h3>
-            </div>
-          )}
-        </div>
+        <AnimatedBook title={title} author={author} coverUrl={coverUrl} coverClassName={coverClassName} />
 
         <div className="flex flex-1 flex-col pt-5">
           <h4 className="text-[18px] leading-6 font-extrabold text-palette-slate-50">
@@ -95,7 +70,7 @@ function RecommendedBookCard({
           </div>
         </div>
       </CardContent>
-    </Card>
+    </BookHoverCard>
   );
 }
 

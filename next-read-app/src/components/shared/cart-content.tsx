@@ -1,41 +1,16 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
+import { AnimatedBook, BookHoverCard } from "@/components/shared/animated-book";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { BookOpen, ShoppingCart, Trash2, LoaderCircle } from "lucide-react";
+import { ShoppingCart, Trash2, LoaderCircle } from "lucide-react";
 import type { Book } from "@/types/book";
 import { CatalogUnavailable } from "@/components/shared/catalog-unavailable";
 import { useToast } from "@/components/providers/app-feedback-provider";
 
 type CartItem = { id: number; book: Book };
-function Cover({ book }: { book: Book }) {
-  const [failed, setFailed] = useState(false);
-  return (
-    <div
-      className={`relative h-[68px] w-[50px] shrink-0 overflow-hidden rounded-xl shadow-lg ${book.coverClassName}`}
-    >
-      {book.coverUrl && !failed ? (
-        <Image
-          src={book.coverUrl}
-          alt={`Cover ${book.title}`}
-          fill
-          unoptimized
-          className="object-cover"
-          onError={() => setFailed(true)}
-        />
-      ) : (
-        <div className="flex h-full flex-col justify-between p-1.5 text-white">
-          <BookOpen className="size-3.5" aria-hidden="true" />
-          <p className="line-clamp-4 text-[8px] font-extrabold leading-tight">
-            {book.title}
-          </p>
-        </div>
-      )}
-    </div>
-  );
-}
+
 export function CartContent() {
   const router = useRouter();
   const [items, setItems] = useState<CartItem[]>([]);
@@ -189,7 +164,7 @@ export function CartContent() {
         </label>
         <ul className="divide-y divide-white/10 border-t border-border">
           {items.map((item) => (
-            <li key={item.id} className="flex items-start gap-2 py-3">
+            <BookHoverCard as="li" unstyled key={item.id} className="flex items-start gap-2 py-3">
               <input
                 type="checkbox"
                 aria-label={`Select ${item.book.title}`}
@@ -207,7 +182,7 @@ export function CartContent() {
                 href={`/books/${encodeURIComponent(item.book.id)}`}
                 className="flex min-w-0 flex-1 items-center gap-2 rounded-xl focus-visible:outline-2 focus-visible:outline-skyblue"
               >
-                <Cover book={item.book} />
+                <div className="w-[50px] shrink-0"><AnimatedBook {...item.book} /></div>
                 <div className="min-w-0">
                   <span className="inline-block rounded-full bg-secondary px-2 py-0.5 text-[8px] font-bold text-skyblue">
                     {item.book.category}
@@ -238,7 +213,7 @@ export function CartContent() {
                   <Trash2 className="size-3.5" aria-hidden="true" />
                 )}
               </button>
-            </li>
+            </BookHoverCard>
           ))}
         </ul>
       </section>

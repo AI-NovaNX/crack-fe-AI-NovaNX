@@ -71,6 +71,30 @@ export async function GET(_request: NextRequest, context: Context) {
     return failure(error);
   }
 }
+export async function PATCH(request: NextRequest, context: Context) {
+  if (request.headers.get("origin") !== request.nextUrl.origin)
+    return json({ message: "Invalid origin" }, 403);
+  if ((await context.params).action !== "profile")
+    return json({ message: "Not found" }, 404);
+  const body = await request.json().catch(() => null);
+  const fullName = typeof body?.fullName === "string" ? body.fullName.trim() : "";
+  const email = typeof body?.email === "string" ? body.email.trim() : "";
+  if (!fullName || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+    return json({ message: "Isi nama dan alamat email yang valid." }, 400);
+  try {
+    // Refresh an expired session before sending the authenticated update.
+    await profile();
+    const user = await apiRequest<User>("/me", {
+      method: "PATCH",
+      headers: { Authorization: `Bearer ${await accessToken()}` },
+      body: JSON.stringify({ fullName, email }),
+    });
+    return json({ user });
+  } catch (error) {
+    return failure(error);
+  }
+}
+
 export async function POST(request: NextRequest, context: Context) {
   // Cookie-authenticated mutations must originate from this frontend.
   if (request.headers.get("origin") !== request.nextUrl.origin)

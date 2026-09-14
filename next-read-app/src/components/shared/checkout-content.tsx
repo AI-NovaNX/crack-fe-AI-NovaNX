@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import { AnimatedBook, BookHoverCard } from "@/components/shared/animated-book";
 import { useSearchParams } from "next/navigation";
 import { BookOpen, CheckCircle2, LoaderCircle } from "lucide-react";
 import type { Book } from "@/types/book";
@@ -23,32 +23,6 @@ const formatDate = (date: Date) =>
     month: "long",
     year: "numeric",
   });
-function BookCover({ book }: { book: Book }) {
-  const [failed, setFailed] = useState(false);
-  return (
-    <div
-      className={`relative h-16 w-12 shrink-0 overflow-hidden rounded-xl shadow-lg sm:h-20 sm:w-14 sm:rounded-2xl ${book.coverClassName}`}
-    >
-      {book.coverUrl && !failed ? (
-        <Image
-          src={book.coverUrl}
-          alt={`Cover ${book.title}`}
-          fill
-          unoptimized
-          className="object-cover"
-          onError={() => setFailed(true)}
-        />
-      ) : (
-        <div className="flex h-full flex-col justify-between p-2 sm:p-3">
-          <BookOpen className="size-4 sm:size-5" aria-hidden="true" />
-          <span className="line-clamp-4 text-[8px] font-extrabold leading-tight sm:text-xs">
-            {book.title}
-          </span>
-        </div>
-      )}
-    </div>
-  );
-}
 
 export function CheckoutContent() {
   const searchParams = useSearchParams();
@@ -228,12 +202,12 @@ export function CheckoutContent() {
         <h2 className="text-base font-extrabold sm:text-lg">Book List</h2>
         <ul className="mt-4 space-y-5 sm:mt-6 sm:space-y-7">
           {data.items.map(({ id, book }) => (
-            <li key={id}>
+            <BookHoverCard as="li" unstyled key={id}>
               <Link
                 href={`/books/${encodeURIComponent(book.id)}`}
                 className="flex w-fit max-w-full items-center gap-3 rounded-2xl focus-visible:outline-2 focus-visible:outline-skyblue sm:gap-5"
               >
-                <BookCover book={book} />
+                <div className="w-12 shrink-0 sm:w-14"><AnimatedBook {...book} /></div>
                 <div className="min-w-0">
                   <span className="inline-block rounded-full border border-skyblue/10 bg-skyblue/10 px-2 py-0.5 text-[9px] font-semibold text-skyblue sm:px-3 sm:py-1 sm:text-xs">
                     {book.category}
@@ -246,7 +220,7 @@ export function CheckoutContent() {
                   </p>
                 </div>
               </Link>
-            </li>
+            </BookHoverCard>
           ))}
         </ul>
       </section>

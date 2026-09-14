@@ -4,12 +4,11 @@ import { notFound } from "next/navigation";
 import { FavoriteAuthorButton } from "@/components/shared/favorite-author-button";
 import { FavoriteButton } from "@/components/shared/favorite-button";
 import { CartButton } from "@/components/shared/cart-button";
-import bookIcon from "@/assets/icons/TrendingBook/Icon-1.svg";
+import { AnimatedBook, BookHoverCard } from "@/components/shared/animated-book";
 import starIcon from "@/assets/icons/TrendingBook/Icon.svg";
 import { AppNav } from "@/components/layout/app-nav";
 import { Footer } from "@/components/layout/footer";
 import { Card, CardContent } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
 import { getAuthorBooks, getAuthorById } from "@/services/authors";
 import type { Author } from "@/types/author";
 import type { Book } from "@/types/book";
@@ -74,19 +73,9 @@ function AuthorBookCard({
   isAvailable,
 }: Book) {
   return (
-    <Card className="h-[404px] rounded-[28px] border border-palette-indigo-300-20 bg-palette-slate-900-80 p-0 py-0 shadow-none ring-0 transition-all duration-200 hover:border-palette-cyan-300 hover:bg-gray-800">
+    <BookHoverCard className="h-full rounded-[28px] border border-palette-indigo-300-20 bg-palette-slate-900-80 p-0 py-0 shadow-none ring-0 transition-all duration-200 hover:border-palette-cyan-300 hover:bg-gray-800">
       <CardContent className="flex h-full flex-col px-5 py-5">
-        <div
-          className={cn(
-            "flex h-[224px] w-full flex-col justify-between rounded-[18px] p-5 shadow-[0px_10px_15px_-3px_rgba(0,_0,_0,_0.3),_0px_4px_6px_-4px_rgba(0,_0,_0,_0.3)]",
-            coverClassName,
-          )}
-        >
-          <Image src={bookIcon} alt="" className="size-7" aria-hidden="true" />
-          <h2 className="max-w-[150px] text-[22px] leading-6 font-extrabold text-white">
-            {title}
-          </h2>
-        </div>
+        <AnimatedBook title={title} author={author} coverUrl={coverUrl} coverClassName={coverClassName} />
 
         <div className="flex flex-1 flex-col pt-5">
           <h3 className="text-[18px] leading-6 font-extrabold text-palette-slate-50">
@@ -126,7 +115,7 @@ function AuthorBookCard({
           </div>
         </div>
       </CardContent>
-    </Card>
+    </BookHoverCard>
   );
 }
 
