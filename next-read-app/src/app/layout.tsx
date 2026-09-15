@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 
 import "./globals.css";
 import { AppFeedbackProvider } from "@/components/providers/app-feedback-provider";
@@ -16,8 +17,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en" className="dark h-full antialiased" suppressHydrationWarning>
-      <head><script dangerouslySetInnerHTML={{ __html: themeInitScript }} /></head>
       <body className="flex min-h-full flex-col">
+        <Script id="nexread-theme-init" strategy="beforeInteractive">
+          {themeInitScript}
+        </Script>
         <AppFeedbackProvider>{children}</AppFeedbackProvider>
       </body>
     </html>

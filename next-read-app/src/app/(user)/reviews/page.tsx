@@ -58,9 +58,15 @@ function mapReview(review: ApiReview): ReviewItem {
 
 function ReviewCard({ review }: { review: ReviewItem }) {
   return (
-    <BookHoverCard as="article" unstyled className="rounded-[22px] border border-palette-indigo-300-20 bg-secondary p-4 shadow-[0_10px_24px_-18px_#000] sm:p-5">
+    <BookHoverCard
+      as="article"
+      unstyled
+      className="rounded-[22px] border border-palette-indigo-300-20 bg-secondary p-4 shadow-[0_10px_24px_-18px_#000] sm:p-5"
+    >
       <div className="flex items-start gap-4">
-        <div className="w-[72px] shrink-0 sm:w-[88px]"><AnimatedBook {...review} compact /></div>
+        <div className="w-[72px] shrink-0 sm:w-[88px]">
+          <AnimatedBook {...review} compact />
+        </div>
 
         <div className="min-w-0 flex-1">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
@@ -127,14 +133,18 @@ export default function ReviewsPage() {
         throw new Error(body?.message || "Review belum dapat dimuat.");
 
       const payload = body as ReviewsResponse;
-      const items = Array.isArray(payload.data) ? payload.data.map(mapReview) : [];
+      const items = Array.isArray(payload.data)
+        ? payload.data.map(mapReview)
+        : [];
       setReviews((current) => (append ? [...current, ...items] : items));
       setPage(payload.meta?.page ?? nextPage);
       setTotalPages(payload.meta?.totalPages ?? 1);
       setStatus("ready");
     } catch (loadError) {
       setError(
-        loadError instanceof Error ? loadError.message : "Periksa koneksi Anda.",
+        loadError instanceof Error
+          ? loadError.message
+          : "Periksa koneksi Anda.",
       );
       setStatus("error");
     }
@@ -193,15 +203,32 @@ export default function ReviewsPage() {
 
       <section className="mt-6 space-y-4">
         {status === "loading" && reviews.length === 0 ? (
-          <div role="status" className="h-40 animate-pulse rounded-[22px] bg-secondary" />
+          <div
+            role="status"
+            className="h-40 animate-pulse rounded-[22px] bg-secondary"
+          />
         ) : status === "login" ? (
           <div className="rounded-[22px] border border-border bg-secondary px-5 py-8 text-center text-sm text-palette-slate-400">
-            Silakan <Link href="/login" className="font-bold text-cyan-300 underline">login</Link> untuk melihat review Anda.
+            Silakan{" "}
+            <Link href="/login" className="font-bold text-cyan-300 underline">
+              login
+            </Link>{" "}
+            untuk melihat review Anda.
           </div>
         ) : status === "error" && reviews.length === 0 ? (
           <div className="rounded-[22px] border border-border bg-secondary px-5 py-8 text-center text-sm text-palette-slate-400">
             <p>{error}</p>
-            <button type="button" onClick={() => { setStatus("loading"); setError(""); void loadReviews(1); }} className="mt-3 rounded-full bg-accent px-4 py-2 font-bold text-foreground">Coba lagi</button>
+            <button
+              type="button"
+              onClick={() => {
+                setStatus("loading");
+                setError("");
+                void loadReviews(1);
+              }}
+              className="mt-3 rounded-full bg-accent px-4 py-2 font-bold text-foreground"
+            >
+              Coba lagi
+            </button>
           </div>
         ) : filteredReviews.length > 0 ? (
           filteredReviews.map((review) => (
@@ -216,7 +243,11 @@ export default function ReviewsPage() {
           <button
             type="button"
             disabled={status === "loading"}
-            onClick={() => { setStatus("loading"); setError(""); void loadReviews(page + 1, true); }}
+            onClick={() => {
+              setStatus("loading");
+              setError("");
+              void loadReviews(page + 1, true);
+            }}
             className="mx-auto block rounded-full border border-border bg-secondary px-5 py-2 text-xs font-bold text-foreground disabled:opacity-50"
           >
             {status === "loading" ? "Memuat..." : "Load More"}

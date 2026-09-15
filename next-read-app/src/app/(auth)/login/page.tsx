@@ -11,6 +11,7 @@ import { AuthPageShell } from "@/components/shared/auth/auth-page-shell";
 import { useToast } from "@/components/providers/app-feedback-provider";
 import { Button } from "@/components/ui/button";
 import type { LoginFormValues } from "@/types/auth";
+import { isAdminRole } from "@/lib/roles";
 
 const initialFormValues: LoginFormValues = {
   email: "",
@@ -35,12 +36,12 @@ export default function LoginPage() {
   const onSubmit = async (values: LoginFormValues) => {
     clearErrors("root");
     try {
-      await submitAuth("login", values);
+      const { user } = await submitAuth("login", values);
       toast({
         title: "Berhasil masuk",
         description: "Selamat datang kembali.",
       });
-      router.push("/");
+      router.push(isAdminRole(user?.role) ? "/admin/dashboard" : "/");
       router.refresh();
     } catch (error) {
       const message =

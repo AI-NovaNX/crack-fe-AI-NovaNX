@@ -115,9 +115,15 @@ function statusLabel(status: LoanStatus) {
 
 function ReviewCard({ review }: { review: ReviewItem }) {
   return (
-    <BookHoverCard as="article" unstyled className="rounded-[22px] border border-palette-indigo-300-20 bg-secondary p-4 shadow-[0_10px_24px_-18px_#000] sm:p-5">
+    <BookHoverCard
+      as="article"
+      unstyled
+      className="rounded-[22px] border border-palette-indigo-300-20 bg-secondary p-4 shadow-[0_10px_24px_-18px_#000] sm:p-5"
+    >
       <div className="flex items-start gap-4">
-        <div className="w-[72px] shrink-0 sm:w-[88px]"><AnimatedBook {...review} compact /></div>
+        <div className="w-[72px] shrink-0 sm:w-[88px]">
+          <AnimatedBook {...review} compact />
+        </div>
 
         <div className="min-w-0 flex-1">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
@@ -170,7 +176,11 @@ function LoanCard({
   onReview: () => void;
 }) {
   return (
-    <BookHoverCard as="article" unstyled className="overflow-hidden rounded-[18px] border border-palette-indigo-300-20 bg-card shadow-[0_10px_24px_-18px_#000]">
+    <BookHoverCard
+      as="article"
+      unstyled
+      className="overflow-hidden rounded-[18px] border border-palette-indigo-300-20 bg-card shadow-[0_10px_24px_-18px_#000]"
+    >
       <div className="flex items-center justify-between border-b border-palette-indigo-300-20 px-3 py-2 text-[9px] font-extrabold sm:px-4">
         <span>
           Status{" "}
@@ -195,7 +205,9 @@ function LoanCard({
         </span>
       </div>
       <div className="flex items-center gap-3 px-3 py-3 sm:px-4 sm:py-4">
-        <div className="w-[60px] shrink-0 sm:w-[72px]"><AnimatedBook {...loan.book} compact /></div>
+        <div className="w-[60px] shrink-0 sm:w-[72px]">
+          <AnimatedBook {...loan.book} compact />
+        </div>
         <div className="min-w-0 flex-1">
           <span className="rounded-full bg-cyan-400/15 px-2 py-0.5 text-[8px] font-bold text-cyan-700 dark:text-cyan-300">
             {loan.book.category}
@@ -229,7 +241,11 @@ function LoanCard({
   );
 }
 
-export function BorrowedList() {
+type BorrowedListProps = {
+  initialTab?: "profile" | "borrowed" | "reviews";
+};
+
+export function BorrowedList({ initialTab = "borrowed" }: BorrowedListProps) {
   const [loans, setLoans] = useState<Loan[]>([]);
   const [status, setStatus] = useState<"loading" | "ready" | "login" | "error">(
     "loading",
@@ -242,9 +258,9 @@ export function BorrowedList() {
   const [reviewedLoanIds, setReviewedLoanIds] = useState<Set<Loan["id"]>>(
     new Set(),
   );
-  const [activeTab, setActiveTab] = useState<"profile" | "borrowed" | "reviews">(
-    "borrowed",
-  );
+  const [activeTab, setActiveTab] = useState<
+    "profile" | "borrowed" | "reviews"
+  >(initialTab);
   const [reviewQuery, setReviewQuery] = useState("");
   const [reviewEntries, setReviewEntries] = useState<ReviewItem[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
@@ -370,34 +386,34 @@ export function BorrowedList() {
   }, [reviewEntries, reviewQuery]);
 
   function renderLoanStatus() {
-  if (status === "loading")
-    return (
-      <div
-        role="status"
-        className="h-96 animate-pulse rounded-[24px] bg-secondary"
-      />
-    );
-  if (status === "error")
-    return (
-      <CatalogUnavailable
-        title="Borrowed list belum dapat dimuat"
-        message={error}
-      />
-    );
-  if (status === "login")
-    return (
-      <section className="rounded-[24px] border border-border bg-secondary p-10 text-center">
-        <h1 className="text-xl font-extrabold">
-          Login untuk melihat borrowed list
-        </h1>
-        <Link
-          href="/login"
-          className="mt-6 inline-flex rounded-full bg-gradient-to-r from-cyan-400 to-violet-600 px-6 py-3 text-sm font-bold"
-        >
-          Login
-        </Link>
-      </section>
-    );
+    if (status === "loading")
+      return (
+        <div
+          role="status"
+          className="h-96 animate-pulse rounded-[24px] bg-secondary"
+        />
+      );
+    if (status === "error")
+      return (
+        <CatalogUnavailable
+          title="Borrowed list belum dapat dimuat"
+          message={error}
+        />
+      );
+    if (status === "login")
+      return (
+        <section className="rounded-[24px] border border-border bg-secondary p-10 text-center">
+          <h1 className="text-xl font-extrabold">
+            Login untuk melihat borrowed list
+          </h1>
+          <Link
+            href="/login"
+            className="mt-6 inline-flex rounded-full bg-gradient-to-r from-cyan-400 to-violet-600 px-6 py-3 text-sm font-bold"
+          >
+            Login
+          </Link>
+        </section>
+      );
 
     return null;
   }
@@ -414,7 +430,8 @@ export function BorrowedList() {
           aria-pressed={activeTab === "profile"}
           className={cn(
             "rounded-full px-4 py-1.5",
-            activeTab === "profile" && "bg-accent font-extrabold text-foreground",
+            activeTab === "profile" &&
+              "bg-accent font-extrabold text-foreground",
           )}
         >
           Profile
@@ -424,7 +441,8 @@ export function BorrowedList() {
           onClick={() => setActiveTab("borrowed")}
           className={cn(
             "rounded-full px-4 py-1.5",
-            activeTab === "borrowed" && "bg-accent font-extrabold text-foreground",
+            activeTab === "borrowed" &&
+              "bg-accent font-extrabold text-foreground",
           )}
         >
           Borrowed List
@@ -434,14 +452,19 @@ export function BorrowedList() {
           onClick={() => setActiveTab("reviews")}
           className={cn(
             "rounded-full px-4 py-1.5",
-            activeTab === "reviews" && "bg-accent font-extrabold text-foreground",
+            activeTab === "reviews" &&
+              "bg-accent font-extrabold text-foreground",
           )}
         >
           Reviews
         </button>
       </nav>
 
-      {activeTab === "profile" ? <ProfileContent /> : activeTab === "borrowed" && status !== "ready" ? renderLoanStatus() : activeTab === "borrowed" ? (
+      {activeTab === "profile" ? (
+        <ProfileContent />
+      ) : activeTab === "borrowed" && status !== "ready" ? (
+        renderLoanStatus()
+      ) : activeTab === "borrowed" ? (
         <>
           <h1 className="mt-5 text-xl font-extrabold sm:text-2xl">
             Borrowed List

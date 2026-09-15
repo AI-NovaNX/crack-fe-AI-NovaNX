@@ -1,11 +1,25 @@
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
-import { apiRequest, ApiError } from "@/lib/api";
+import { apiRequest, ApiError, createApiUrl } from "@/lib/api";
 import { getHttpErrorMessage } from "@/lib/error-message";
 
-type User = { id: number; fullName: string; email: string; role: string };
+type User = {
+  id: number;
+  fullName: string;
+  email: string;
+  role: string;
+  phoneNumber?: string | null;
+  avatar?: string | null;
+};
 type AuthResponse = { accessToken: string; refreshToken: string; user: User };
 type Context = { params: Promise<{ action: string }> };
+const acceptedAvatarTypes = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+]);
+const maxAvatarSize = 5 * 1024 * 1024;
 const accessKey = "nexread_access";
 const refreshKey = "nexread_refresh";
 const cookieOptions = {
@@ -79,6 +93,8 @@ export async function PATCH(request: NextRequest, context: Context) {
   const body = await request.json().catch(() => null);
   const fullName = typeof body?.fullName === "string" ? body.fullName.trim() : "";
   const email = typeof body?.email === "string" ? body.email.trim() : "";
+  const phoneNumber =
+    typeof body?.phoneNumber === "string" ? body.phoneNumber.trim() : "";
   if (!fullName || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
     return json({ message: "Isi nama dan alamat email yang valid." }, 400);
   try {
@@ -87,7 +103,7 @@ export async function PATCH(request: NextRequest, context: Context) {
     const user = await apiRequest<User>("/me", {
       method: "PATCH",
       headers: { Authorization: `Bearer ${await accessToken()}` },
-      body: JSON.stringify({ fullName, email }),
+      body: JSON.stringify({ fullName, email, phoneNumber: phoneNumber || null }),
     });
     return json({ user });
   } catch (error) {
@@ -100,9 +116,50 @@ export async function POST(request: NextRequest, context: Context) {
   if (request.headers.get("origin") !== request.nextUrl.origin)
     return json({ message: "Invalid origin" }, 403);
   const { action } = await context.params;
-  if (!["login", "register", "logout"].includes(action))
+  if (!["login", "register", "logout", "avatar"].includes(action))
     return json({ message: "Not found" }, 404);
   try {
+    if (action === "avatar") {
+      await profile();
+      const formData = await request.formData();
+      const file = formData.get("avatar") ?? formData.get("file");
+      if (!(file instanceof File))
+        return json({ message: "Pilih gambar avatar terlebih dahulu." }, 400);
+      if (!acceptedAvatarTypes.has(file.type))
+        return json({ message: "Gunakan file JPG, PNG, WEBP, atau GIF." }, 400);
+      if (file.size > maxAvatarSize)
+        return json({ message: "Ukuran gambar maksimal 5 MB." }, 400);
+
+      const uploadFormData = new FormData();
+      uploadFormData.set("avatar", file);
+      const uploadResponse = await fetch(createApiUrl("/me"), {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${await accessToken()}` },
+        body: uploadFormData,
+        cache: "no-store",
+      });
+      const uploadBody = (await uploadResponse.json().catch(() => null)) as
+        | User
+        | { message?: string }
+        | null;
+      if (!uploadResponse.ok) {
+        const errorMessage =
+          uploadBody &&
+          "message" in uploadBody &&
+          typeof uploadBody.message === "string"
+            ? uploadBody.message
+            : "Avatar belum dapat diunggah.";
+        throw new ApiError(
+          uploadResponse.status,
+          errorMessage,
+        );
+      }
+      const user = uploadBody as User | null;
+      if (!user?.avatar)
+        throw new ApiError(502, "Backend belum mengembalikan path avatar.");
+      return json({ user, avatar: user.avatar });
+    }
+
     if (action === "logout") {
       try {
         await profile();

@@ -8,6 +8,7 @@ export type NavigationItem = {
 export type NavigationUser = {
   name: string;
   initials: string;
+  avatar?: string | null;
 };
 
 export type UserNavProps = {

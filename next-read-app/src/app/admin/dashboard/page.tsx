@@ -1,10 +1,19 @@
+import { AdminTabs } from "@/components/admin/admin-tabs";
+import { AdminUserList } from "@/components/admin/admin-user-list";
+import { Footer } from "@/components/layout/footer";
+
 export default function AdminDashboardPage() {
   return (
-    <main className="min-h-screen bg-background px-6 py-10 text-foreground">
-      <section className="mx-auto flex w-full max-w-6xl flex-col gap-2">
-        <p className="text-sm font-semibold text-muted-foreground">Admin</p>
-        <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+    <main className="mx-auto w-full max-w-[1160px] px-5 pb-8 font-outfit text-palette-slate-50 sm:px-8">
+      <section aria-labelledby="user-list-title" className="pt-3 sm:pt-5">
+        <AdminTabs active="users" />
+
+        <AdminUserList />
       </section>
+
+      <div className="pt-16 sm:pt-20">
+        <Footer />
+      </div>
     </main>
   );
 }

@@ -1,16 +1,20 @@
 "use client";
 
 import { Star, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
+import { useState } from "react";
 
 import { useToast } from "@/components/providers/app-feedback-provider";
 import {
-  Card,
   CardContent,
   CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 
 type ReviewBook = { id: string; title: string };
@@ -27,22 +31,7 @@ export function ReviewModal({
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const closeButtonRef = useRef<HTMLButtonElement>(null);
   const toast = useToast();
-
-  useEffect(() => {
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    closeButtonRef.current?.focus();
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && !submitting) onClose();
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [onClose, submitting]);
 
   async function submitReview(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -78,33 +67,32 @@ export function ReviewModal({
     }
   }
 
-  return createPortal(
-    <div
-      className="fixed inset-0 z-[110] grid place-items-center bg-[#030712]/75 px-4 py-8 backdrop-blur-sm"
-      onMouseDown={(event) => {
-        if (event.target === event.currentTarget && !submitting) onClose();
+  return (
+    <Dialog
+      open
+      onOpenChange={(open) => {
+        if (!open && !submitting) onClose();
       }}
     >
-      <Card
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="review-dialog-title"
-        className="relative w-full max-w-[420px] gap-0 overflow-hidden rounded-[28px] border border-palette-indigo-300-20 bg-card py-0 font-outfit text-palette-slate-50 shadow-[0_30px_90px_rgba(6,_10,_28,_0.55)] ring-0 before:pointer-events-none before:absolute before:inset-0 before:bg-[linear-gradient(135deg,rgba(77,_222,_255,_0.08),transparent_42%,rgba(124,_92,_255,_0.12))] before:content-['']"
+      <DialogContent
+        backdropClassName="z-[110] bg-[#030712]/75"
+        viewportClassName="z-[111] px-4 py-8"
+        className="relative max-w-[420px] gap-0 overflow-hidden rounded-[28px] border-palette-indigo-300-20 bg-card p-0 font-outfit text-palette-slate-50 shadow-[0_30px_90px_rgba(6,_10,_28,_0.55)] ring-0 before:pointer-events-none before:absolute before:inset-0 before:bg-[linear-gradient(135deg,rgba(77,_222,_255,_0.08),transparent_42%,rgba(124,_92,_255,_0.12))] before:content-['']"
       >
         <CardHeader className="relative grid grid-cols-[1fr_auto] items-center border-b border-palette-indigo-300-20 px-6 py-5">
-          <CardTitle id="review-dialog-title" className="text-lg font-extrabold">
+          <DialogTitle className="text-lg font-extrabold">
             Give Review
-          </CardTitle>
-          <button
-            ref={closeButtonRef}
-            type="button"
-            onClick={onClose}
+          </DialogTitle>
+          <DialogDescription className="sr-only">
+            Berikan rating dan ulasan untuk {book.title}.
+          </DialogDescription>
+          <DialogClose
             disabled={submitting}
             aria-label="Tutup modal review"
             className="rounded-full border border-transparent bg-secondary p-1.5 text-palette-slate-400 transition-colors hover:border-palette-cyan-300 hover:bg-accent hover:text-palette-cyan-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-palette-cyan-300 disabled:opacity-50"
           >
             <X className="size-5" aria-hidden="true" />
-          </button>
+          </DialogClose>
         </CardHeader>
         <CardContent className="relative px-6 pt-5 pb-6">
           <form onSubmit={submitReview}>
@@ -154,8 +142,7 @@ export function ReviewModal({
             </fieldset>
           </form>
         </CardContent>
-      </Card>
-    </div>,
-    document.body,
+      </DialogContent>
+    </Dialog>
   );
 }

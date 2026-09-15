@@ -4,6 +4,7 @@ import { useCart } from "@/components/providers/cart-provider";
 import { GuestNav } from "@/components/layout/guest-nav";
 import { UserNav } from "@/components/layout/user-nav";
 import { useToast } from "@/components/providers/app-feedback-provider";
+import { getInitials } from "@/lib/avatar";
 import { AUTH_CHANGED_EVENT, type SessionUser } from "@/lib/auth";
 
 export function AppNav() {
@@ -56,13 +57,14 @@ export function AppNav() {
     };
   }, [toast]);
   if (!user) return <GuestNav />;
-  const initials =
-    user.fullName
-      .trim()
-      .split(/\s+/)
-      .slice(0, 2)
-      .map((part) => part[0])
-      .join("")
-      .toUpperCase() || "U";
-  return <UserNav user={{ name: user.fullName, initials }} cartCount={cartCount} />;
+  return (
+    <UserNav
+      user={{
+        name: user.fullName,
+        initials: getInitials(user.fullName),
+        avatar: user.avatar,
+      }}
+      cartCount={cartCount}
+    />
+  );
 }

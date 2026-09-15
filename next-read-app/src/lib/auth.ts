@@ -4,6 +4,8 @@ export type SessionUser = {
   fullName: string;
   email: string;
   role: string;
+  phoneNumber?: string | null;
+  avatar?: string | null;
 };
 export async function submitAuth(
   action: "login" | "register" | "logout",

@@ -24,7 +24,7 @@ export function HeaderSearch(props: HeaderSearchProps) {
   return (
     <Suspense
       fallback={
-        <div className="h-8 w-full max-w-[280px] min-w-0 sm:h-14 sm:max-w-[320px]" />
+        <div className="h-8 w-full min-w-0 flex-1 basis-full sm:h-14 sm:basis-[280px]" />
       }
     >
       <SearchForm {...props} />
@@ -99,7 +99,7 @@ function SearchForm({
       role="search"
       aria-busy={isSearching}
       onSubmit={handleSubmit}
-      className="relative z-10 box-border flex h-8 w-full max-w-[280px] min-w-0 items-center gap-1 rounded-full border-[0.9px] border-solid border-palette-indigo-300-20 bg-secondary px-2 py-0 text-palette-slate-400 shadow-[inset_0_0_0_1px_rgba(255,_255,_255,_0.04)] backdrop-blur-xl sm:h-14 sm:max-w-[320px] sm:gap-3 sm:rounded-num-30504000 sm:px-5"
+      className="relative z-10 box-border flex h-8 w-full min-w-0 flex-1 basis-full items-center gap-1 rounded-full border-[0.9px] border-solid border-palette-indigo-300-20 bg-secondary px-2 py-0 text-palette-slate-400 shadow-[inset_0_0_0_1px_rgba(255,_255,_255,_0.04)] backdrop-blur-xl sm:h-14 sm:basis-[280px] sm:gap-3 sm:rounded-num-30504000 sm:px-5"
     >
       <Search
         className="relative size-3 shrink-0 text-skyblue sm:h-5 sm:w-5"
