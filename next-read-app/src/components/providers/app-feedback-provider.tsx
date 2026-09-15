@@ -11,7 +11,7 @@ import {
   type ReactNode,
 } from "react";
 
-type ToastVariant = "success" | "error" | "info";
+type ToastVariant = "success" | "error" | "info" | "add-success";
 type ToastInput = {
   title: string;
   description?: string;
@@ -62,7 +62,58 @@ function Toast({ item, dismiss }: { item: ToastItem; dismiss: () => void }) {
   }, [dismiss]);
 
   const isError = item.variant === "error";
-  const Icon = item.variant === "success" ? CheckCircle2 : AlertCircle;
+  const isAddSuccess = item.variant === "add-success";
+  const Icon =
+    item.variant === "success" || isAddSuccess ? CheckCircle2 : AlertCircle;
+
+  if (isAddSuccess) {
+    return (
+      <div
+        role="status"
+        className="pointer-events-auto relative w-full overflow-hidden rounded-2xl p-[1.5px] shadow-[0_0_32px_rgba(34,211,238,0.35)]"
+        style={{
+          background: "linear-gradient(135deg, #22d3ee, #6366f1, #a855f7)",
+        }}
+      >
+        <div className="flex items-start gap-3 rounded-2xl bg-[#0b1629] px-4 py-4">
+          {/* Ambient glow orbs */}
+          <div
+            className="absolute -top-6 -left-6 size-24 rounded-full bg-cyan-400/20 blur-2xl"
+            aria-hidden="true"
+          />
+          <div
+            className="absolute -right-6 -bottom-6 size-20 rounded-full bg-violet-500/20 blur-2xl"
+            aria-hidden="true"
+          />
+
+          {/* Icon with gradient circle */}
+          <div className="relative mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-cyan-400 to-violet-500 shadow-[0_0_12px_rgba(34,211,238,0.5)]">
+            <CheckCircle2 className="size-4 text-white" aria-hidden="true" />
+          </div>
+
+          <div className="relative min-w-0 flex-1">
+            <p className="bg-gradient-to-r from-cyan-300 via-blue-400 to-violet-400 bg-clip-text text-sm font-extrabold text-transparent">
+              {item.title}
+            </p>
+            {item.description ? (
+              <p className="pt-1 text-xs leading-5 text-slate-400">
+                {item.description}
+              </p>
+            ) : null}
+          </div>
+
+          <button
+            type="button"
+            aria-label="Tutup notifikasi"
+            onClick={dismiss}
+            className="relative rounded-full p-1 text-slate-400 hover:bg-white/10 hover:text-white"
+          >
+            <X className="size-4" aria-hidden="true" />
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div

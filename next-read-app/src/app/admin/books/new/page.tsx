@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { AdminBookCreateForm } from "@/components/admin/admin-book-create-form";
 import { CatalogUnavailable } from "@/components/shared/catalog-unavailable";
+import { Card, CardContent } from "@/components/ui/card";
 import { getApiErrorMessage } from "@/lib/error-message";
 import { getAuthors } from "@/services/authors";
 import { getCategories } from "@/services/categories";
@@ -43,9 +44,11 @@ export default async function AdminAddBookPage() {
         <ArrowLeft className="size-6" aria-hidden="true" />
         Add Book
       </Link>
-      <section className="mt-7 rounded-[28px] border border-palette-indigo-300-20 bg-card p-5 shadow-[0_28px_70px_-32px_rgba(0,0,0,0.65)] sm:p-8">
-        <AdminBookCreateForm authors={authors} categories={categories} />
-      </section>
+      <Card className="mt-7 rounded-[28px] border border-palette-indigo-300-20 py-0 shadow-[0_28px_70px_-32px_rgba(0,0,0,0.65)]">
+        <CardContent className="p-5 sm:p-8">
+          <AdminBookCreateForm authors={authors} categories={categories} />
+        </CardContent>
+      </Card>
     </main>
   );
 }
