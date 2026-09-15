@@ -54,7 +54,11 @@ export async function POST(request: NextRequest) {
       { message: "Please sign in." },
       { status: 401, headers: responseHeaders },
     );
-  const body = await request.json().catch(() => null);
+  const multipart = request.headers.get("content-type")?.startsWith("multipart/form-data");
+  const form = multipart ? await request.formData().catch(() => null) : null;
+  const body = multipart
+    ? form && Object.fromEntries(form.entries())
+    : await request.json().catch(() => null);
   if (
     !body ||
     typeof body.id !== "string" ||
@@ -72,7 +76,7 @@ export async function POST(request: NextRequest) {
     const book = await apiRequest("/books", {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
-      body: JSON.stringify({
+      body: form ?? JSON.stringify({
         id: body.id.trim(),
         title: body.title.trim(),
         authorId: body.authorId,

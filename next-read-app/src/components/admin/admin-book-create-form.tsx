@@ -1,8 +1,8 @@
 "use client";
 
-import { ImageIcon, Link2, Trash2 } from "lucide-react";
+import { ImageIcon, Link2, Trash2, Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 
 import { useToast } from "@/components/providers/app-feedback-provider";
 
@@ -37,9 +37,30 @@ export function AdminBookCreateForm({
   const [totalCopies, setTotalCopies] = useState("1");
   const [description, setDescription] = useState("");
   const [coverUrl, setCoverUrl] = useState("");
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState("");
+  const fileInput = useRef<HTMLInputElement>(null);
   const [coverFailed, setCoverFailed] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    return () => { if (previewUrl) URL.revokeObjectURL(previewUrl); };
+  }, [previewUrl]);
+
+  function selectCover(file?: File) {
+    if (!file) return;
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type) || file.size > 5 * 1024 * 1024) {
+      setError("Cover harus berupa JPG, PNG, atau WEBP, maksimal 5 MB.");
+      if (fileInput.current) fileInput.current.value = "";
+      return;
+    }
+    setCoverFile(file);
+    setPreviewUrl(URL.createObjectURL(file));
+    setCoverUrl("");
+    setCoverFailed(false);
+    setError("");
+  }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -51,19 +72,19 @@ export function AdminBookCreateForm({
     setSaving(true);
     setError("");
     try {
+      const form = new FormData();
+      form.set("id", id);
+      form.set("title", title.trim());
+      form.set("authorId", authorId);
+      form.set("categoryId", categoryId);
+      form.set("totalCopies", totalCopies);
+      if (pageCount) form.set("pageCount", pageCount);
+      if (description.trim()) form.set("description", description.trim());
+      if (coverFile) form.set("cover", coverFile);
+      else if (coverUrl.trim()) form.set("coverUrl", coverUrl.trim());
       const response = await fetch("/api/admin/books", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id,
-          title,
-          authorId,
-          categoryId,
-          pageCount: pageCount ? Number(pageCount) : null,
-          totalCopies: Number(totalCopies),
-          description,
-          coverUrl,
-        }),
+        body: form,
       });
       const body = await response.json().catch(() => null);
       if (!response.ok)
@@ -153,10 +174,10 @@ export function AdminBookCreateForm({
       <div>
         <label htmlFor="cover-url" className="text-xs font-bold">Cover Image</label>
         <div className="mt-2 rounded-2xl border border-dashed border-palette-indigo-300-20 bg-secondary p-5 text-center">
-          {coverUrl && !coverFailed ? (
+          {(coverFile ? previewUrl : coverUrl) && !coverFailed ? (
             <div className="mx-auto w-32 overflow-hidden rounded-lg border border-border bg-card shadow-xl">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={coverUrl} alt="Book cover preview" onError={() => setCoverFailed(true)} className="aspect-[2/3] h-auto w-full object-cover" />
+              <img src={coverFile ? previewUrl : coverUrl} alt="Book cover preview" onError={() => setCoverFailed(true)} className="aspect-[2/3] h-auto w-full object-cover" />
             </div>
           ) : (
             <div className="mx-auto flex aspect-[2/3] w-32 flex-col items-center justify-center rounded-lg border border-border bg-card text-palette-slate-400">
@@ -164,16 +185,21 @@ export function AdminBookCreateForm({
               <span className="mt-2 text-[10px]">Cover preview</span>
             </div>
           )}
+          <input ref={fileInput} type="file" accept="image/jpeg,image/png,image/webp" aria-label="Upload book cover" className="sr-only" disabled={saving} onChange={(event) => selectCover(event.target.files?.[0])} />
+          <button type="button" disabled={saving} onClick={() => fileInput.current?.click()} className="mt-4 inline-flex max-w-full items-center gap-2 rounded-xl border border-cyan-400/30 bg-cyan-400/10 px-5 py-3 text-xs font-bold text-palette-cyan-300 disabled:opacity-50">
+            <Upload className="size-4 shrink-0" aria-hidden="true" />
+            <span className="truncate">{coverFile?.name ?? "Browse image"}</span>
+          </button>
           <div className="relative mx-auto mt-4 max-w-xl">
             <Link2 aria-hidden="true" className="absolute top-1/2 left-4 size-4 -translate-y-1/2 text-palette-slate-400" />
-            <input id="cover-url" type="url" value={coverUrl} onChange={(event) => { setCoverUrl(event.target.value); setCoverFailed(false); }} placeholder="https://example.com/book-cover.jpg" className={`${fieldClass} mt-0 pl-11`} />
+            <input id="cover-url" type="url" value={coverUrl} disabled={saving} onChange={(event) => { setCoverUrl(event.target.value); setCoverFile(null); if (fileInput.current) fileInput.current.value = ""; setCoverFailed(false); }} placeholder="Or paste an image URL" className={`${fieldClass} mt-0 pl-11`} />
           </div>
-          {coverUrl && (
-            <button type="button" onClick={() => { setCoverUrl(""); setCoverFailed(false); }} className="mt-3 inline-flex items-center gap-2 rounded-full border border-red-400/25 px-4 py-2 text-[10px] font-bold text-red-400 hover:bg-red-400/10">
+          {(coverUrl || coverFile) && (
+            <button type="button" disabled={saving} onClick={() => { setCoverUrl(""); setCoverFile(null); if (fileInput.current) fileInput.current.value = ""; setCoverFailed(false); }} className="mt-3 inline-flex items-center gap-2 rounded-full border border-red-400/25 px-4 py-2 text-[10px] font-bold text-red-400 hover:bg-red-400/10">
               <Trash2 className="size-3.5" aria-hidden="true" /> Remove image
             </button>
           )}
-          <p className="mt-3 text-[10px] text-palette-slate-400">Use an absolute HTTPS image URL supported by the backend.</p>
+          <p className="mt-3 text-[10px] text-palette-slate-400">JPG, PNG, or WEBP. Maximum 5 MB. The cover is uploaded when you save.</p>
         </div>
       </div>
 

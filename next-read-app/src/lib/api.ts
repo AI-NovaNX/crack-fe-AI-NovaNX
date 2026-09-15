@@ -76,7 +76,8 @@ export async function apiRequest<T>(
 ): Promise<T> {
   const headers = new Headers(init.headers);
   headers.set("Accept", "application/json");
-  if (init.body) headers.set("Content-Type", "application/json");
+  if (init.body instanceof FormData) headers.delete("Content-Type");
+  else if (init.body) headers.set("Content-Type", "application/json");
   const response = await fetchWithNetworkRetry(createApiUrl(path), {
     ...init,
     headers,
