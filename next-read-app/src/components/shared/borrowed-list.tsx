@@ -2,18 +2,19 @@
 
 import { AnimatedBook, BookHoverCard } from "@/components/shared/animated-book";
 import Link from "next/link";
-import { Search, Star } from "lucide-react";
+import { BookMarked, Search, Star } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { CatalogUnavailable } from "@/components/shared/catalog-unavailable";
 import { ReviewModal } from "@/components/shared/review-modal";
+import { ReturnRequestModal } from "@/components/shared/return-request-modal";
 import { ProfileContent } from "@/components/shared/profile-content";
 import { getBookCoverUrl } from "@/lib/book-covers";
 import { cn } from "@/lib/utils";
 import { getBookDetail } from "@/services/books";
 import type { Book } from "@/types/book";
 
-type LoanStatus = "active" | "returned" | "overdue";
+type LoanStatus = "active" | "return_requested" | "returned" | "overdue";
 type Loan = {
   id: number | string;
   book: Book;
@@ -26,6 +27,7 @@ type Loan = {
 const statuses: Array<{ label: string; value: "all" | LoanStatus }> = [
   { label: "All", value: "all" },
   { label: "Active", value: "active" },
+  { label: "Pending Return", value: "return_requested" },
   { label: "Returned", value: "returned" },
   { label: "Overdue", value: "overdue" },
 ];
@@ -49,7 +51,16 @@ function asString(value: unknown) {
 
 function mapStatus(value: unknown, dueDate: string | null): LoanStatus {
   const normalized = String(value ?? "").toLowerCase();
-  if (normalized.includes("return")) return "returned";
+  if (
+    normalized === "return_requested" ||
+    normalized.includes("return_request")
+  )
+    return "return_requested";
+  if (
+    normalized === "returned" ||
+    (normalized.includes("return") && !normalized.includes("request"))
+  )
+    return "returned";
   if (
     normalized.includes("overdue") ||
     (dueDate && new Date(dueDate) < new Date())
@@ -109,8 +120,15 @@ function formatDate(value: string | null) {
   }).format(new Date(value));
 }
 
+const STATUS_LABELS: Record<LoanStatus, string> = {
+  active: "Active",
+  return_requested: "Pending Return",
+  returned: "Returned",
+  overdue: "Overdue",
+};
+
 function statusLabel(status: LoanStatus) {
-  return status[0].toUpperCase() + status.slice(1);
+  return STATUS_LABELS[status] ?? status;
 }
 
 function ReviewCard({ review }: { review: ReviewItem }) {
@@ -170,11 +188,16 @@ function LoanCard({
   loan,
   reviewed,
   onReview,
+  onReturn,
 }: {
   loan: Loan;
   reviewed: boolean;
   onReview: () => void;
+  onReturn: () => void;
 }) {
+  const canReturn = loan.status === "active" || loan.status === "overdue";
+  const isPendingReturn = loan.status === "return_requested";
+
   return (
     <BookHoverCard
       as="article"
@@ -188,6 +211,8 @@ function LoanCard({
             className={cn(
               "ml-1 rounded-full px-2 py-0.5 text-[8px]",
               loan.status === "active" && "bg-emerald-400/20 text-emerald-300",
+              loan.status === "return_requested" &&
+                "bg-amber-400/20 text-amber-400",
               loan.status === "returned" &&
                 "bg-cyan-400/20 text-cyan-700 dark:text-cyan-300",
               loan.status === "overdue" &&
@@ -228,14 +253,35 @@ function LoanCard({
             {loan.durationDays ? `· Duration ${loan.durationDays} Days` : ""}
           </p>
         </div>
-        <button
-          type="button"
-          onClick={onReview}
-          disabled={reviewed}
-          className="shrink-0 rounded-full bg-gradient-to-r from-cyan-400 to-violet-600 px-4 py-2 text-[9px] font-extrabold text-white shadow-[0_4px_16px_#22d3ee40] transition-transform enabled:hover:scale-[1.02] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-300 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {reviewed ? "Reviewed" : "Give Review"}
-        </button>
+        <div className="flex shrink-0 flex-col gap-1.5">
+          {/* Return button — only for active/overdue */}
+          {canReturn && (
+            <button
+              type="button"
+              onClick={onReturn}
+              className="flex items-center gap-1 rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1.5 text-[9px] font-extrabold text-amber-400 transition-colors hover:bg-amber-400/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-400"
+            >
+              <BookMarked className="size-3" aria-hidden="true" />
+              Return
+            </button>
+          )}
+          {/* Pending badge — when return requested */}
+          {isPendingReturn && (
+            <span className="flex items-center gap-1 rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1.5 text-[9px] font-bold text-amber-400">
+              <BookMarked className="size-3" aria-hidden="true" />
+              Awaiting Admin
+            </span>
+          )}
+          {/* Review button */}
+          <button
+            type="button"
+            onClick={onReview}
+            disabled={reviewed || loan.status !== "returned"}
+            className="rounded-full bg-gradient-to-r from-cyan-400 to-violet-600 px-4 py-2 text-[9px] font-extrabold text-white shadow-[0_4px_16px_#22d3ee40] transition-transform enabled:hover:scale-[1.02] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-300 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {reviewed ? "Reviewed" : "Give Review"}
+          </button>
+        </div>
       </div>
     </BookHoverCard>
   );
@@ -255,6 +301,7 @@ export function BorrowedList({ initialTab = "borrowed" }: BorrowedListProps) {
   const [filter, setFilter] = useState<"all" | LoanStatus>("all");
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
   const [reviewBook, setReviewBook] = useState<Loan["book"] | null>(null);
+  const [returnLoan, setReturnLoan] = useState<Loan | null>(null);
   const [reviewedLoanIds, setReviewedLoanIds] = useState<Set<Loan["id"]>>(
     new Set(),
   );
@@ -511,6 +558,7 @@ export function BorrowedList({ initialTab = "borrowed" }: BorrowedListProps) {
                   loan={loan}
                   reviewed={reviewedLoanIds.has(loan.id)}
                   onReview={() => setReviewBook(loan.book)}
+                  onReturn={() => setReturnLoan(loan)}
                 />
               ))}
             </div>
@@ -578,6 +626,23 @@ export function BorrowedList({ initialTab = "borrowed" }: BorrowedListProps) {
             if (loan)
               setReviewedLoanIds((current) => new Set(current).add(loan.id));
             setReviewBook(null);
+          }}
+        />
+      ) : null}
+
+      {returnLoan ? (
+        <ReturnRequestModal
+          loan={returnLoan}
+          onClose={() => setReturnLoan(null)}
+          onRequested={() => {
+            setLoans((current) =>
+              current.map((l) =>
+                l.id === returnLoan.id
+                  ? { ...l, status: "return_requested" as LoanStatus }
+                  : l,
+              ),
+            );
+            setReturnLoan(null);
           }}
         />
       ) : null}

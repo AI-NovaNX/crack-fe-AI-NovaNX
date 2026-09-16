@@ -13,6 +13,8 @@ type Checkout = {
   user: SessionUser & { phone?: string };
   items: { id: number | string; book: Book }[];
 };
+const adminBorrowMessage =
+  "Admin accounts cannot borrow books. Use a user account to borrow books.";
 const panel =
   "rounded-[20px] border border-border bg-card p-3.5 shadow-[0_20px_40px_-24px_#00000080] sm:rounded-[24px] sm:p-6";
 const action =
@@ -31,7 +33,7 @@ export function CheckoutContent() {
   const directBookId = searchParams.get("bookId")?.trim() ?? "";
   const [data, setData] = useState<Checkout | null>(null);
   const [status, setStatus] = useState<
-    "loading" | "ready" | "login" | "error" | "success"
+    "loading" | "ready" | "login" | "admin" | "error" | "success"
   >("loading");
   const [error, setError] = useState("");
   const [attempt, setAttempt] = useState(0);
@@ -62,6 +64,10 @@ export function CheckoutContent() {
         }
         if (!response.ok)
           throw new Error(body.message || "Checkout belum dapat dimuat.");
+        if (body.user?.role && body.user.role.toLowerCase() === "admin") {
+          setStatus("admin");
+          return;
+        }
         setData(body);
         setBorrowDate(new Date());
         setStatus("ready");
@@ -142,6 +148,16 @@ export function CheckoutContent() {
         </Link>
       </section>
     );
+  if (status === "admin")
+    return (
+      <section className={`${panel} text-center`}>
+        <h2 className="text-xl font-bold">Peminjaman tidak tersedia</h2>
+        <p className="mt-3 text-palette-slate-400">{adminBorrowMessage}</p>
+        <Link href="/admin/dashboard" className={`${action} mt-6`}>
+          Kembali ke Admin
+        </Link>
+      </section>
+    );
   if (status === "success")
     return (
       <section role="status" className={`${panel} text-center`}>
@@ -207,7 +223,9 @@ export function CheckoutContent() {
                 href={`/books/${encodeURIComponent(book.id)}`}
                 className="flex w-fit max-w-full items-center gap-3 rounded-2xl focus-visible:outline-2 focus-visible:outline-skyblue sm:gap-5"
               >
-                <div className="w-12 shrink-0 sm:w-14"><AnimatedBook {...book} /></div>
+                <div className="w-12 shrink-0 sm:w-14">
+                  <AnimatedBook {...book} />
+                </div>
                 <div className="min-w-0">
                   <span className="inline-block rounded-full border border-skyblue/10 bg-skyblue/10 px-2 py-0.5 text-[9px] font-semibold text-skyblue sm:px-3 sm:py-1 sm:text-xs">
                     {book.category}
@@ -302,7 +320,10 @@ export function CheckoutContent() {
             </label>
           </div>
           {error && (
-            <p role="alert" className="mb-4 text-sm text-red-700 dark:text-red-300">
+            <p
+              role="alert"
+              className="mb-4 text-sm text-red-700 dark:text-red-300"
+            >
               {error}
             </p>
           )}

@@ -8,6 +8,7 @@ import { ShoppingCart, Trash2, LoaderCircle } from "lucide-react";
 import type { Book } from "@/types/book";
 import { CatalogUnavailable } from "@/components/shared/catalog-unavailable";
 import { useToast } from "@/components/providers/app-feedback-provider";
+import { useCart } from "@/components/providers/cart-provider";
 
 type CartItem = { id: number; book: Book };
 
@@ -22,6 +23,7 @@ export function CartContent() {
   const [attempt, setAttempt] = useState(0);
   const selectAll = useRef<HTMLInputElement>(null);
   const toast = useToast();
+  const { isAdmin } = useCart();
   const deleting = useRef(new Set<number>());
   const [removing, setRemoving] = useState<number[]>([]);
   async function removeItem(item: CartItem) {
@@ -164,7 +166,12 @@ export function CartContent() {
         </label>
         <ul className="divide-y divide-white/10 border-t border-border">
           {items.map((item) => (
-            <BookHoverCard as="li" unstyled key={item.id} className="flex items-start gap-2 py-3">
+            <BookHoverCard
+              as="li"
+              unstyled
+              key={item.id}
+              className="flex items-start gap-2 py-3"
+            >
               <input
                 type="checkbox"
                 aria-label={`Select ${item.book.title}`}
@@ -182,7 +189,9 @@ export function CartContent() {
                 href={`/books/${encodeURIComponent(item.book.id)}`}
                 className="flex min-w-0 flex-1 items-center gap-2 rounded-xl focus-visible:outline-2 focus-visible:outline-skyblue"
               >
-                <div className="w-[50px] shrink-0"><AnimatedBook {...item.book} /></div>
+                <div className="w-[50px] shrink-0">
+                  <AnimatedBook {...item.book} />
+                </div>
                 <div className="min-w-0">
                   <span className="inline-block rounded-full bg-secondary px-2 py-0.5 text-[8px] font-bold text-skyblue">
                     {item.book.category}
@@ -226,11 +235,11 @@ export function CartContent() {
           </span>
         </div>
         <button
-          disabled={!selected.length}
+          disabled={isAdmin || !selected.length}
           onClick={() => router.push(`/checkout?items=${selected.join(",")}`)}
           className="w-full rounded-full bg-secondary px-3 py-2 text-[10px] font-bold text-foreground transition-all duration-200 enabled:hover:bg-gradient-to-r enabled:hover:from-cyan-400 enabled:hover:to-violet-600 enabled:hover:shadow-[0_4px_16px_#22d3ee40] enabled:focus-visible:bg-gradient-to-r enabled:focus-visible:from-cyan-400 enabled:focus-visible:to-violet-600 enabled:focus-visible:outline-2 enabled:focus-visible:outline-offset-4 enabled:focus-visible:outline-cyan-300 enabled:active:scale-[0.98] enabled:active:bg-gradient-to-r enabled:active:from-cyan-400 enabled:active:to-violet-600 disabled:cursor-not-allowed disabled:bg-secondary disabled:text-muted-foreground disabled:shadow-none"
         >
-          Borrow Book
+          {isAdmin ? "Admins cannot borrow" : "Borrow Book"}
         </button>
         <p className="sr-only">Peminjaman buku pilihan belum tersedia.</p>
       </aside>

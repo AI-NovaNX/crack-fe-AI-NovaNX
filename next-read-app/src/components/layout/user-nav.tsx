@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import type { UserNavProps } from "@/types/user-nav";
 import { getAvatarSrc } from "@/lib/avatar";
+import { isAdminRole } from "@/lib/roles";
 import { cn } from "@/lib/utils";
 
 const defaultUser = {
@@ -51,6 +52,13 @@ export const UserNav = ({
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
   const avatarSrc = getAvatarSrc(user.avatar);
+  const menuItems = [
+    ["Favorite Books", "/favorites"],
+    ["Favorite Author", "/favorite-author"],
+    ["Profile", "/borrowed?tab=profile"],
+    ["Borrowed List", "/borrowed?tab=borrowed"],
+    ["Reviews", "/borrowed?tab=reviews"],
+  ].filter(([label]) => label !== "Borrowed List" || !isAdminRole(user.role));
   const logout = async () => {
     setLoggingOut(true);
     try {
@@ -142,7 +150,11 @@ export const UserNav = ({
             <span className="flex size-6 shrink-0 items-center justify-center rounded-full [background:linear-gradient(135deg,_#4ddeff,_#55d6ff_7.14%,_#5bcdff_14.29%,_#61c5ff_21.43%,_#65bcff_28.57%,_#69b3ff_35.71%,_#6dabff_42.86%,_#70a2ff_50%,_#7399ff_57.14%,_#758fff_64.29%,_#7786ff_71.43%,_#797cff_78.57%,_#7a72ff_85.71%,_#7b67ff_92.86%,_#7c5cff)] text-[8px] font-extrabold leading-4 sm:h-11 sm:w-11 sm:text-sm">
               {avatarSrc ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={avatarSrc} alt="" className="h-full w-full rounded-full object-cover" />
+                <img
+                  src={avatarSrc}
+                  alt=""
+                  className="h-full w-full rounded-full object-cover"
+                />
               ) : (
                 user.initials
               )}
@@ -160,13 +172,7 @@ export const UserNav = ({
               <DropdownMenuLabel className="px-3 pt-1 pb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-palette-slate-400">
                 My Corner
               </DropdownMenuLabel>
-              {[
-                ["Favorite Books", "/favorites"],
-                ["Favorite Author", "/favorite-author"],
-                ["Profile", "/borrowed?tab=profile"],
-                ["Borrowed List", "/borrowed?tab=borrowed"],
-                ["Reviews", "/borrowed?tab=reviews"],
-              ].map(([label, href]) => (
+              {menuItems.map(([label, href]) => (
                 <DropdownMenuLinkItem
                   key={href}
                   render={<Link href={href} />}
@@ -191,25 +197,25 @@ export const UserNav = ({
           onOpenChange={setIsLogoutDialogOpen}
         >
           <AlertDialogContent>
-                <AlertDialogTitle className="text-xl font-extrabold">
-                  Keluar dari NexRead?
-                </AlertDialogTitle>
-                <AlertDialogDescription className="pt-2 text-sm leading-6 text-palette-slate-400">
-                  Sesi Anda akan diakhiri pada perangkat ini.
-                </AlertDialogDescription>
-                <div className="flex justify-end gap-3 pt-6">
-                  <AlertDialogCancel
-                    className={buttonVariants({ variant: "outline" })}
-                  >
-                    Batal
-                  </AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={() => void logout()}
-                    className={buttonVariants({ variant: "destructive" })}
-                  >
-                    Ya, keluar
-                  </AlertDialogAction>
-                </div>
+            <AlertDialogTitle className="text-xl font-extrabold">
+              Keluar dari NexRead?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="pt-2 text-sm leading-6 text-palette-slate-400">
+              Sesi Anda akan diakhiri pada perangkat ini.
+            </AlertDialogDescription>
+            <div className="flex justify-end gap-3 pt-6">
+              <AlertDialogCancel
+                className={buttonVariants({ variant: "outline" })}
+              >
+                Batal
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => void logout()}
+                className={buttonVariants({ variant: "destructive" })}
+              >
+                Ya, keluar
+              </AlertDialogAction>
+            </div>
           </AlertDialogContent>
         </AlertDialog>
       </div>

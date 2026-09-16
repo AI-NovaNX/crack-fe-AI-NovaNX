@@ -62,6 +62,7 @@ export function AppNav() {
       user={{
         name: user.fullName,
         initials: getInitials(user.fullName),
+        role: user.role,
         avatar: user.avatar,
       }}
       cartCount={cartCount}
