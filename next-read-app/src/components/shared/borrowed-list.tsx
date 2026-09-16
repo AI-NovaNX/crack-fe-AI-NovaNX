@@ -11,7 +11,6 @@ import { ReturnRequestModal } from "@/components/shared/return-request-modal";
 import { ProfileContent } from "@/components/shared/profile-content";
 import { getBookCoverUrl } from "@/lib/book-covers";
 import { cn } from "@/lib/utils";
-import { getBookDetail } from "@/services/books";
 import type { Book } from "@/types/book";
 
 type LoanStatus = "active" | "return_requested" | "returned" | "overdue";
@@ -367,7 +366,7 @@ export function BorrowedList({ initialTab = "borrowed" }: BorrowedListProps) {
   const visibleLoans = filteredLoans.slice(0, visibleCount);
 
   useEffect(() => {
-    if (activeTab !== "reviews" || loans.length === 0) {
+    if (activeTab !== "reviews") {
       return;
     }
 
@@ -378,28 +377,60 @@ export function BorrowedList({ initialTab = "borrowed" }: BorrowedListProps) {
       setReviewsError("");
 
       try {
-        const reviewGroups = await Promise.all(
-          loans.map(async (loan) => {
-            const bookDetail = await getBookDetail(loan.book.id);
-            if (!bookDetail?.reviews?.length) return [];
+        const response = await fetch("/api/reviews?page=1&limit=100", {
+          cache: "no-store",
+        });
+        const body = await response.json();
+        if (!response.ok)
+          throw new Error(body?.message || "Review belum dapat dimuat.");
 
-            return bookDetail.reviews.map((review) => ({
-              id: String(review.id),
-              date: formatDate(review.createdAt),
-              title: bookDetail.title,
-              author: bookDetail.author,
-              category: bookDetail.category,
-              rating: review.rating,
-              comment: review.comment || "No comment provided.",
-              coverUrl: bookDetail.coverUrl,
-              coverClassName: bookDetail.coverClassName,
-            }));
-          }),
-        );
+        const values: unknown[] = Array.isArray(body)
+          ? body
+          : Array.isArray(body?.data)
+            ? body.data
+            : [];
+        const entries = values.flatMap((value, index) => {
+          if (!value || typeof value !== "object") return [];
+          const review = value as Record<string, unknown>;
+          const book = review.book as Record<string, unknown> | undefined;
+          if (!book || typeof book !== "object") return [];
+          const author = book.author;
+          const category = book.category;
+          const comment = review.comment;
+          return [
+            {
+              id: String(review.id ?? index),
+              date: formatDate(asString(review.createdAt)),
+              title: String(book.title ?? "Book title"),
+              author:
+                typeof author === "object" && author
+                  ? String(
+                      (author as Record<string, unknown>).name ?? "Author name",
+                    )
+                  : String(author ?? "Author name"),
+              category:
+                typeof category === "object" && category
+                  ? String(
+                      (category as Record<string, unknown>).name ?? "Category",
+                    )
+                  : String(category ?? "Category"),
+              rating: Number(review.rating ?? 0),
+              comment:
+                typeof comment === "string" ? comment : "No comment provided.",
+              coverUrl: getBookCoverUrl(
+                asString(book.coverUrl ?? book.coverImage ?? book.imageUrl),
+              ),
+              coverClassName: String(
+                book.coverClassName ??
+                  "bg-gradient-to-br from-orange-500 to-red-500",
+              ),
+            },
+          ];
+        });
 
         if (!isMounted) return;
 
-        setReviewEntries(reviewGroups.flat());
+        setReviewEntries(entries);
       } catch (loadError) {
         if (!isMounted) return;
         setReviewsError(
