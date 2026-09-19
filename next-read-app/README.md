@@ -9,6 +9,10 @@ searching books, and opening author-specific book pages.
 
 [Open NexRead](https://nexread.ai-novanx.online/)
 
+## Application Preview
+
+![NexRead application preview](public/Nexread.png)
+
 ## Tech Stack
 
 - Next.js 16 with App Router
