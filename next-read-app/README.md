@@ -9,6 +9,8 @@ management for administrators.
 
 [Open NexRead](https://nexread.ai-novanx.online/)
 
+Backend API: [Railway staging deployment](https://crack-be-ai-novanx-staging.up.railway.app/)
+
 ## Application Preview
 
 ![NexRead application preview](public/Nexread.png)
@@ -17,6 +19,60 @@ management for administrators.
   <img src="public/Admin-Nexread.png" alt="Admin Nexread application" />
   <figcaption>Aplikasi Admin Nexread.</figcaption>
 </figure>
+
+## Data Model
+
+The backend manages the persisted catalog and borrowing data used by the
+frontend. Favorites are currently browser-local, keyed by the signed-in user;
+see [docs/favorites.md](docs/favorites.md) for the planned API contract.
+
+```mermaid
+erDiagram
+  USER ||--o{ LOAN : borrows
+  USER ||--o{ REVIEW : writes
+  USER ||--o{ CART_ITEM : owns
+  AUTHOR ||--o{ BOOK : writes
+  CATEGORY ||--o{ BOOK : classifies
+  BOOK ||--o{ LOAN : is_borrowed_in
+  BOOK ||--o{ REVIEW : receives
+  BOOK ||--o{ CART_ITEM : is_added_as
+
+  USER {
+    number id PK
+    string fullName
+    string email
+    string role
+  }
+  AUTHOR {
+    string id PK
+    string name
+  }
+  CATEGORY {
+    string id PK
+    string name
+    string slug
+  }
+  BOOK {
+    string id PK
+    string title
+    number rating
+    boolean isAvailable
+  }
+  LOAN {
+    string id PK
+    string status
+    date dueDate
+  }
+  REVIEW {
+    string id PK
+    number rating
+    string content
+  }
+  CART_ITEM {
+    string id PK
+    string bookId FK
+  }
+```
 
 ## Tech Stack
 

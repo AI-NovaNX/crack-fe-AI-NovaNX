@@ -11,5 +11,7 @@ describe("role helpers", () => {
   it("allows only the admin role into protected admin routes", () => {
     expect(isAdminRole("ADMIN")).toBe(true);
     expect(isAdminRole("user")).toBe(false);
+    expect(isAdminRole(" administrator ")).toBe(false);
+    expect(isAdminRole(undefined)).toBe(false);
   });
 });

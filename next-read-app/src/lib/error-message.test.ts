@@ -12,4 +12,19 @@ describe("error messages", () => {
       "Backend unavailable",
     );
   });
+
+  it("maps known HTTP errors and honors supplied validation details", () => {
+    expect(getHttpErrorMessage(400, "A title is required.")).toBe(
+      "A title is required.",
+    );
+    expect(getHttpErrorMessage(403)).toContain("do not have permission");
+    expect(getHttpErrorMessage(503)).toContain("trouble responding");
+  });
+
+  it("uses status-aware and fallback API messages", () => {
+    expect(getApiErrorMessage({ status: 404 })).toContain("not found");
+    expect(getApiErrorMessage(null, "Try again later.")).toBe(
+      "Try again later.",
+    );
+  });
 });

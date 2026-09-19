@@ -134,7 +134,7 @@ export function CartContent() {
         />
         <h2 className="text-xl font-bold">Your cart is still empty</h2>
         <p className="mt-3 text-palette-slate-400">
-          Find a book you'd like to read.
+          Find a book you&apos;d like to read.
         </p>
         <Link
           href="/book-list"

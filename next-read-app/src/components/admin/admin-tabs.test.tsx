@@ -19,5 +19,11 @@ describe("AdminTabs", () => {
       "href",
       "/admin/categories",
     );
+    expect(
+      screen.getByRole("navigation", {
+        name: "Admin management navigation",
+      }),
+    ).toBeInTheDocument();
+    expect(screen.getAllByRole("link")).toHaveLength(7);
   });
 });
