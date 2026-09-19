@@ -18,8 +18,7 @@ export async function POST(
     return json({ message: "Invalid origin" }, 403);
 
   const token = (await cookies()).get("nexread_access")?.value;
-  if (!token)
-    return json({ message: "Please sign in to continue." }, 401);
+  if (!token) return json({ message: "Please sign in to continue." }, 401);
 
   const { id } = await params;
   const loanId = Number(id);

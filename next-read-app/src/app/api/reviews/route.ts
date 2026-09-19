@@ -10,10 +10,12 @@ const json = (body: unknown, status = 200) =>
 
 export async function GET(request: NextRequest) {
   const token = (await cookies()).get("nexread_access")?.value;
-  if (!token)
-    return json({ message: "Please sign in to view reviews." }, 401);
+  if (!token) return json({ message: "Please sign in to view reviews." }, 401);
 
-  const page = Math.max(1, Number(request.nextUrl.searchParams.get("page")) || 1);
+  const page = Math.max(
+    1,
+    Number(request.nextUrl.searchParams.get("page")) || 1,
+  );
   const limit = Math.min(
     100,
     Math.max(1, Number(request.nextUrl.searchParams.get("limit")) || 10),
@@ -44,7 +46,8 @@ export async function POST(request: NextRequest) {
     return json({ message: "Invalid origin" }, 403);
 
   const token = (await cookies()).get("nexread_access")?.value;
-  if (!token) return json({ message: "Please sign in to leave a review." }, 401);
+  if (!token)
+    return json({ message: "Please sign in to leave a review." }, 401);
 
   const body = await request.json().catch(() => null);
   const rating = body?.rating;
@@ -53,7 +56,10 @@ export async function POST(request: NextRequest) {
   if (typeof body?.bookId !== "string" || !body.bookId.trim())
     return json({ message: "Invalid book ID." }, 400);
   if (!Number.isInteger(rating) || rating < 1 || rating > 5)
-    return json({ message: "Please choose a rating between 1 and 5 stars." }, 400);
+    return json(
+      { message: "Please choose a rating between 1 and 5 stars." },
+      400,
+    );
   if (comment.length > 1000)
     return json({ message: "Reviews can be at most 1000 characters." }, 400);
 

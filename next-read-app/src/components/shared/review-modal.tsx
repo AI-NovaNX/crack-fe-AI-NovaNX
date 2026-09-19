@@ -4,10 +4,7 @@ import { Star, X } from "lucide-react";
 import { useState } from "react";
 
 import { useToast } from "@/components/providers/app-feedback-provider";
-import {
-  CardContent,
-  CardHeader,
-} from "@/components/ui/card";
+import { CardContent, CardHeader } from "@/components/ui/card";
 import {
   Dialog,
   DialogClose,
@@ -100,7 +97,11 @@ export function ReviewModal({
               <legend className="w-full text-center text-xs font-extrabold text-palette-slate-400">
                 Give Rating
               </legend>
-              <div className="mt-2 flex justify-center gap-2" role="radiogroup" aria-label="Book rating">
+              <div
+                className="mt-2 flex justify-center gap-2"
+                role="radiogroup"
+                aria-label="Book rating"
+              >
                 {[1, 2, 3, 4, 5].map((value) => (
                   <button
                     key={value}

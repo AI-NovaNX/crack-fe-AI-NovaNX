@@ -116,9 +116,7 @@ export function CartContent() {
   if (status === "login")
     return (
       <div className="rounded-[28px] border border-border bg-secondary p-10 text-center">
-        <h2 className="text-xl font-bold">
-          Login to view your cart
-        </h2>
+        <h2 className="text-xl font-bold">Login to view your cart</h2>
         <Link
           href="/login"
           className="mt-6 inline-block rounded-full bg-gradient-to-r from-cyan-400 to-violet-600 px-8 py-3 font-bold"
@@ -241,7 +239,9 @@ export function CartContent() {
         >
           {isAdmin ? "Admins cannot borrow" : "Borrow Book"}
         </button>
-        <p className="sr-only">Borrowing selected books is not yet available.</p>
+        <p className="sr-only">
+          Borrowing selected books is not yet available.
+        </p>
       </aside>
     </div>
   );

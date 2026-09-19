@@ -50,7 +50,11 @@ export default function LoginPage() {
         type: "server",
         message,
       });
-      toast({ title: "Sign in failed", description: message, variant: "error" });
+      toast({
+        title: "Sign in failed",
+        description: message,
+        variant: "error",
+      });
     }
   };
 

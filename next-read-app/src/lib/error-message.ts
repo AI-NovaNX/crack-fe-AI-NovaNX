@@ -7,7 +7,8 @@ export function getHttpErrorMessage(status: number, detail?: string) {
   switch (status) {
     case 400:
       return (
-        detail || "The submitted data is invalid. Please check your input again."
+        detail ||
+        "The submitted data is invalid. Please check your input again."
       );
     case 401:
       return detail || "Your session has expired. Please sign in again.";

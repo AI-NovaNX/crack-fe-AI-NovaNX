@@ -20,7 +20,8 @@ export function RouteErrorState({
   useEffect(() => {
     toast({
       title,
-      description: "The connection to the service is disrupted. Please try again.",
+      description:
+        "The connection to the service is disrupted. Please try again.",
       variant: "error",
     });
   }, [title, toast]);
@@ -34,8 +35,8 @@ export function RouteErrorState({
         />
         <h1 className="pt-5 text-2xl font-extrabold">{title}</h1>
         <p className="pt-3 leading-7 text-palette-slate-400">
-          The connection to the service is disrupted or the request could not
-          be processed. You can try again without losing this page.
+          The connection to the service is disrupted or the request could not be
+          processed. You can try again without losing this page.
         </p>
         <div className="flex justify-center gap-3 pt-6">
           <Button type="button" onClick={reset} className="gap-2 rounded-full">

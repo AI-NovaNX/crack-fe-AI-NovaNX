@@ -25,7 +25,17 @@ const pageParagraphs = [
 ];
 
 // The entire card drives the cover, including its stretched title link.
-export function BookHoverCard({ children, className, as = "div", unstyled = false }: { children: ReactNode; className?: string; as?: "div" | "article" | "li" | "section"; unstyled?: boolean }) {
+export function BookHoverCard({
+  children,
+  className,
+  as = "div",
+  unstyled = false,
+}: {
+  children: ReactNode;
+  className?: string;
+  as?: "div" | "article" | "li" | "section";
+  unstyled?: boolean;
+}) {
   const reduced = useReducedMotion();
   const [focused, setFocused] = useState(false);
   const Container = motion[as];
@@ -37,18 +47,34 @@ export function BookHoverCard({ children, className, as = "div", unstyled = fals
       whileHover={reduced ? "closed" : "open"}
       onFocusCapture={() => setFocused(true)}
       onBlurCapture={(event) => {
-        if (!event.currentTarget.contains(event.relatedTarget)) setFocused(false);
+        if (!event.currentTarget.contains(event.relatedTarget))
+          setFocused(false);
       }}
-    >{children}</Container>
+    >
+      {children}
+    </Container>
   );
 }
 
-export function AnimatedBook({ title, author, coverUrl, coverClassName, compact = false }: {
-  title: string; author?: string; coverUrl?: string; coverClassName: string; compact?: boolean;
+export function AnimatedBook({
+  title,
+  author,
+  coverUrl,
+  coverClassName,
+  compact = false,
+}: {
+  title: string;
+  author?: string;
+  coverUrl?: string;
+  coverClassName: string;
+  compact?: boolean;
 }) {
   const [failedUrl, setFailedUrl] = useState<string>();
   return (
-    <div className="relative aspect-[2/3] w-full px-[4%] py-[2%]" style={{ perspective: 1000, containerType: "inline-size" }}>
+    <div
+      className="relative aspect-[2/3] w-full px-[4%] py-[2%]"
+      style={{ perspective: 1000, containerType: "inline-size" }}
+    >
       <motion.div
         className="absolute inset-x-[4%] inset-y-[4%]"
         style={{ transformStyle: "preserve-3d" }}
@@ -60,13 +86,39 @@ export function AnimatedBook({ title, author, coverUrl, coverClassName, compact 
         }}
         transition={{ type: "tween", duration: 0.3, ease: "easeInOut" }}
       >
-        <div aria-hidden="true" className={cn("absolute inset-0 shadow-xl", compact ? "translate-x-[2px] translate-y-px rounded-r-[2px]" : "translate-x-2 translate-y-1 rounded-r-lg", coverClassName)} />
-        <div aria-hidden="true" className={cn("absolute right-0 border border-stone-300", compact ? "inset-y-px left-px translate-x-[2px] rounded-r-[2px]" : "inset-y-1 left-1 translate-x-1.5 rounded-r-md")} style={{ background: "repeating-linear-gradient(to bottom, #f5f0e5 0px, #f5f0e5 2px, #d6cdbb 3px)" }} />
+        <div
+          aria-hidden="true"
+          className={cn(
+            "absolute inset-0 shadow-xl",
+            compact
+              ? "translate-x-[2px] translate-y-px rounded-r-[2px]"
+              : "translate-x-2 translate-y-1 rounded-r-lg",
+            coverClassName,
+          )}
+        />
+        <div
+          aria-hidden="true"
+          className={cn(
+            "absolute right-0 border border-stone-300",
+            compact
+              ? "inset-y-px left-px translate-x-[2px] rounded-r-[2px]"
+              : "inset-y-1 left-1 translate-x-1.5 rounded-r-md",
+          )}
+          style={{
+            background:
+              "repeating-linear-gradient(to bottom, #f5f0e5 0px, #f5f0e5 2px, #d6cdbb 3px)",
+          }}
+        />
         {[0, 1, 2].map((page) => (
           <div
             key={page}
             aria-hidden="true"
-            className={cn("absolute right-0 origin-left border border-stone-300 bg-[#fffaf0] shadow-sm", compact ? "inset-y-px left-px rounded-r-[2px]" : "inset-y-1 left-1 rounded-r-md")}
+            className={cn(
+              "absolute right-0 origin-left border border-stone-300 bg-[#fffaf0] shadow-sm",
+              compact
+                ? "inset-y-px left-px rounded-r-[2px]"
+                : "inset-y-1 left-1 rounded-r-md",
+            )}
             style={{
               containerType: "inline-size",
               backfaceVisibility: "hidden",
@@ -78,41 +130,70 @@ export function AnimatedBook({ title, author, coverUrl, coverClassName, compact 
                 Illustration page
               </div>
               <div className="py-[7%] text-center">
-                <div className="text-[3.5cqw] tracking-[0.18em]">CHAPTER {page + 1}</div>
+                <div className="text-[3.5cqw] tracking-[0.18em]">
+                  CHAPTER {page + 1}
+                </div>
                 <div className="mt-[3%] text-[5.5cqw] leading-tight italic">
                   {["A Beginning", "Along the Journey", "The Next Page"][page]}
                 </div>
               </div>
               <div className="min-h-0 flex-1 overflow-hidden text-justify text-[3.8cqw] leading-[1.65]">
                 {pageParagraphs[page].map((paragraph, index) => (
-                  <p key={index} className={cn("mb-[5%]", index > 0 && "indent-[8%]")}>
+                  <p
+                    key={index}
+                    className={cn("mb-[5%]", index > 0 && "indent-[8%]")}
+                  >
                     {paragraph}
                   </p>
                 ))}
               </div>
-              <div className="pt-[5%] text-center text-[3.5cqw]">{page + 1}</div>
+              <div className="pt-[5%] text-center text-[3.5cqw]">
+                {page + 1}
+              </div>
             </div>
           </div>
         ))}
         <div
-          className={cn("absolute inset-0 origin-left overflow-hidden shadow-[4px_7px_16px_#0005]", compact ? "rounded-l-[1px] rounded-r-[2px]" : "rounded-l-sm rounded-r-lg", coverClassName)}
+          className={cn(
+            "absolute inset-0 origin-left overflow-hidden shadow-[4px_7px_16px_#0005]",
+            compact
+              ? "rounded-l-[1px] rounded-r-[2px]"
+              : "rounded-l-sm rounded-r-lg",
+            coverClassName,
+          )}
           style={{
             backfaceVisibility: "hidden",
             transform: `translateZ(${compact ? 1.4 : 4}px) rotateY(calc(var(--book-open, 0) * -48deg))`,
           }}
         >
           {coverUrl && failedUrl !== coverUrl ? (
-            <Image src={coverUrl} alt={`Cover ${title}`} fill unoptimized sizes="(min-width: 1024px) 270px, 50vw" className="object-cover" onError={() => setFailedUrl(coverUrl)} />
+            <Image
+              src={coverUrl}
+              alt={`Cover ${title}`}
+              fill
+              unoptimized
+              sizes="(min-width: 1024px) 270px, 50vw"
+              className="object-cover"
+              onError={() => setFailedUrl(coverUrl)}
+            />
           ) : (
             <div className="flex h-full flex-col items-center justify-between p-[12%] text-center text-white">
               <span aria-hidden="true" className="h-px w-2/3 bg-white/50" />
-              <span className="font-serif text-[10cqw] font-bold leading-tight">{title}</span>
+              <span className="font-serif text-[10cqw] font-bold leading-tight">
+                {title}
+              </span>
               <span className="text-[5cqw] tracking-wide">{author}</span>
               <span aria-hidden="true" className="h-px w-2/3 bg-white/50" />
             </div>
           )}
-          <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 left-0 w-[8%] border-r border-black/20 bg-gradient-to-r from-black/40 via-white/15 to-black/10" />
-          <div aria-hidden="true" className="pointer-events-none absolute inset-0 rounded-r-lg ring-1 ring-inset ring-white/20" />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-y-0 left-0 w-[8%] border-r border-black/20 bg-gradient-to-r from-black/40 via-white/15 to-black/10"
+          />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 rounded-r-lg ring-1 ring-inset ring-white/20"
+          />
         </div>
       </motion.div>
     </div>

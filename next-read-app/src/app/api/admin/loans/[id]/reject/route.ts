@@ -14,8 +14,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const accessToken = request.headers.get(ADMIN_ACCESS_HEADER);
-  if (!accessToken)
-    return json({ message: "Please sign in." }, 401);
+  if (!accessToken) return json({ message: "Please sign in." }, 401);
 
   const { id } = await params;
   const loanId = Number(id);
@@ -41,4 +40,3 @@ export async function PATCH(
     );
   }
 }
-

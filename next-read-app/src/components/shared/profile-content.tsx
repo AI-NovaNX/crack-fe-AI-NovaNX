@@ -12,7 +12,9 @@ export function ProfileContent() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [status, setStatus] = useState<"loading" | "ready" | "login" | "error">("loading");
+  const [status, setStatus] = useState<"loading" | "ready" | "login" | "error">(
+    "loading",
+  );
   const [error, setError] = useState("");
   const [attempt, setAttempt] = useState(0);
   const [saving, setSaving] = useState(false);
@@ -24,11 +26,18 @@ export function ProfileContent() {
     const controller = new AbortController();
     async function load() {
       try {
-        const response = await fetch("/api/auth/session", { cache: "no-store", signal: controller.signal });
+        const response = await fetch("/api/auth/session", {
+          cache: "no-store",
+          signal: controller.signal,
+        });
         const body = await response.json();
         if (controller.signal.aborted) return;
-        if (response.status === 401) { setStatus("login"); return; }
-        if (!response.ok) throw new Error(body.message || "Your profile could not be loaded.");
+        if (response.status === 401) {
+          setStatus("login");
+          return;
+        }
+        if (!response.ok)
+          throw new Error(body.message || "Your profile could not be loaded.");
         setUser(body.user);
         setFullName(body.user.fullName);
         setEmail(body.user.email);
@@ -36,7 +45,9 @@ export function ProfileContent() {
         setStatus("ready");
       } catch (error) {
         if (controller.signal.aborted) return;
-        setError(error instanceof Error ? error.message : "Check your connection.");
+        setError(
+          error instanceof Error ? error.message : "Check your connection.",
+        );
         setStatus("error");
       }
     }
@@ -61,8 +72,16 @@ export function ProfileContent() {
         }),
       });
       const body = await response.json();
-      if (response.status === 401) { setStatus("login"); return; }
-      if (!response.ok) throw new Error(response.status === 409 ? "This email is already used by another account." : body.message || "Your profile could not be updated.");
+      if (response.status === 401) {
+        setStatus("login");
+        return;
+      }
+      if (!response.ok)
+        throw new Error(
+          response.status === 409
+            ? "This email is already used by another account."
+            : body.message || "Your profile could not be updated.",
+        );
       setUser(body.user);
       setFullName(body.user.fullName);
       setEmail(body.user.email);
@@ -70,7 +89,11 @@ export function ProfileContent() {
       window.dispatchEvent(new Event(AUTH_CHANGED_EVENT));
       toast({ title: "Profile updated successfully", variant: "success" });
     } catch (error) {
-      setError(error instanceof Error ? error.message : "Check your connection and try again.");
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Check your connection and try again.",
+      );
     } finally {
       pending.current = false;
       setSaving(false);
@@ -78,22 +101,59 @@ export function ProfileContent() {
   }
 
   function updateAvatar(avatar: string | null) {
-    setUser((current) => current ? { ...current, avatar } : current);
+    setUser((current) => (current ? { ...current, avatar } : current));
     window.dispatchEvent(new Event(AUTH_CHANGED_EVENT));
     toast({ title: "Avatar updated successfully", variant: "success" });
   }
 
   const initials = getInitials(user?.fullName);
   const avatarSrc = getAvatarSrc(user?.avatar);
-  const fieldClass = "min-w-0 w-full rounded-full border border-transparent bg-secondary px-4 py-2.5 text-sm font-semibold text-foreground outline-none focus-visible:border-cyan-400 focus-visible:ring-2 focus-visible:ring-cyan-400/25 sm:text-right disabled:opacity-50";
+  const fieldClass =
+    "min-w-0 w-full rounded-full border border-transparent bg-secondary px-4 py-2.5 text-sm font-semibold text-foreground outline-none focus-visible:border-cyan-400 focus-visible:ring-2 focus-visible:ring-cyan-400/25 sm:text-right disabled:opacity-50";
   return (
     <section aria-labelledby="profile-title" className="mt-8 max-w-[720px]">
-      <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-cyan-700 dark:text-cyan-300">Reader identity</p>
-      <h1 id="profile-title" className="mt-2 text-2xl font-extrabold text-foreground sm:text-3xl">Profile</h1>
+      <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-cyan-700 dark:text-cyan-300">
+        Reader identity
+      </p>
+      <h1
+        id="profile-title"
+        className="mt-2 text-2xl font-extrabold text-foreground sm:text-3xl"
+      >
+        Profile
+      </h1>
       <div className="mt-6 rounded-[28px] border border-border bg-card p-5 shadow-[0_20px_45px_-25px_#0008] sm:p-7">
-        {status === "loading" ? <p role="status" className="animate-pulse py-12 text-center text-sm text-palette-slate-400">Loading profile…</p> :
-          status === "login" ? <p className="py-8 text-center text-sm">Please <Link href="/login" className="font-bold text-skyblue underline">login</Link> to update your profile.</p> :
-          status === "error" ? <div role="alert" className="py-8 text-center text-sm"><p>{error}</p><button type="button" onClick={() => { setStatus("loading"); setError(""); setAttempt(value => value + 1); }} className="mt-4 rounded-full bg-secondary px-5 py-2 font-bold">Try again</button></div> : <>
+        {status === "loading" ? (
+          <p
+            role="status"
+            className="animate-pulse py-12 text-center text-sm text-palette-slate-400"
+          >
+            Loading profile…
+          </p>
+        ) : status === "login" ? (
+          <p className="py-8 text-center text-sm">
+            Please{" "}
+            <Link href="/login" className="font-bold text-skyblue underline">
+              login
+            </Link>{" "}
+            to update your profile.
+          </p>
+        ) : status === "error" ? (
+          <div role="alert" className="py-8 text-center text-sm">
+            <p>{error}</p>
+            <button
+              type="button"
+              onClick={() => {
+                setStatus("loading");
+                setError("");
+                setAttempt((value) => value + 1);
+              }}
+              className="mt-4 rounded-full bg-secondary px-5 py-2 font-bold"
+            >
+              Try again
+            </button>
+          </div>
+        ) : (
+          <>
             <div className="flex items-center gap-4 border-b border-border pb-6">
               <button
                 type="button"
@@ -103,7 +163,11 @@ export function ProfileContent() {
               >
                 {avatarSrc ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={avatarSrc} alt="" className="h-full w-full object-cover" />
+                  <img
+                    src={avatarSrc}
+                    alt=""
+                    className="h-full w-full object-cover"
+                  />
                 ) : (
                   initials
                 )}
@@ -111,7 +175,14 @@ export function ProfileContent() {
                   Edit
                 </span>
               </button>
-              <div className="min-w-0"><h2 className="break-words font-extrabold text-foreground">{user?.fullName}</h2><p className="mt-1 text-xs text-palette-slate-400">NexRead member</p></div>
+              <div className="min-w-0">
+                <h2 className="break-words font-extrabold text-foreground">
+                  {user?.fullName}
+                </h2>
+                <p className="mt-1 text-xs text-palette-slate-400">
+                  NexRead member
+                </p>
+              </div>
             </div>
             <AvatarUploadModal
               open={avatarModalOpen}
@@ -122,14 +193,94 @@ export function ProfileContent() {
             />
             <form onSubmit={submit} className="mt-2" aria-busy={saving}>
               <fieldset disabled={saving}>
-                <div className="grid items-center gap-2 border-b border-border py-4 sm:grid-cols-[150px_minmax(0,1fr)]"><label htmlFor="profile-name" className="text-xs text-palette-slate-400">Name</label><input id="profile-name" name="fullName" autoComplete="name" required value={fullName} onChange={event => setFullName(event.target.value)} className={fieldClass} /></div>
-                <div className="grid items-center gap-2 border-b border-border py-4 sm:grid-cols-[150px_minmax(0,1fr)]"><label htmlFor="profile-email" className="text-xs text-palette-slate-400">Email</label><input id="profile-email" name="email" type="email" autoComplete="email" required value={email} onChange={event => setEmail(event.target.value)} className={fieldClass} /></div>
-                <div className="grid items-center gap-2 py-4 sm:grid-cols-[150px_minmax(0,1fr)]"><label htmlFor="profile-phone" className="text-xs text-palette-slate-400">Phone Number</label><div><input id="profile-phone" name="phoneNumber" type="tel" autoComplete="tel" inputMode="tel" value={phoneNumber} onChange={event => setPhoneNumber(event.target.value)} placeholder="e.g. 0812 3456 7890" aria-describedby="profile-phone-help" className={fieldClass} /><p id="profile-phone-help" className="mt-2 text-[11px] text-palette-slate-400 sm:text-right">Optional. Leave blank to remove your phone number.</p></div></div>
+                <div className="grid items-center gap-2 border-b border-border py-4 sm:grid-cols-[150px_minmax(0,1fr)]">
+                  <label
+                    htmlFor="profile-name"
+                    className="text-xs text-palette-slate-400"
+                  >
+                    Name
+                  </label>
+                  <input
+                    id="profile-name"
+                    name="fullName"
+                    autoComplete="name"
+                    required
+                    value={fullName}
+                    onChange={(event) => setFullName(event.target.value)}
+                    className={fieldClass}
+                  />
+                </div>
+                <div className="grid items-center gap-2 border-b border-border py-4 sm:grid-cols-[150px_minmax(0,1fr)]">
+                  <label
+                    htmlFor="profile-email"
+                    className="text-xs text-palette-slate-400"
+                  >
+                    Email
+                  </label>
+                  <input
+                    id="profile-email"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    required
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                    className={fieldClass}
+                  />
+                </div>
+                <div className="grid items-center gap-2 py-4 sm:grid-cols-[150px_minmax(0,1fr)]">
+                  <label
+                    htmlFor="profile-phone"
+                    className="text-xs text-palette-slate-400"
+                  >
+                    Phone Number
+                  </label>
+                  <div>
+                    <input
+                      id="profile-phone"
+                      name="phoneNumber"
+                      type="tel"
+                      autoComplete="tel"
+                      inputMode="tel"
+                      value={phoneNumber}
+                      onChange={(event) => setPhoneNumber(event.target.value)}
+                      placeholder="e.g. 0812 3456 7890"
+                      aria-describedby="profile-phone-help"
+                      className={fieldClass}
+                    />
+                    <p
+                      id="profile-phone-help"
+                      className="mt-2 text-[11px] text-palette-slate-400 sm:text-right"
+                    >
+                      Optional. Leave blank to remove your phone number.
+                    </p>
+                  </div>
+                </div>
               </fieldset>
-              {error && <p role="alert" className="mb-4 text-sm text-red-600 dark:text-red-400">{error}</p>}
-              <button type="submit" disabled={saving || !fullName.trim() || (fullName.trim() === user?.fullName && email.trim() === user?.email && phoneNumber.trim() === (user?.phoneNumber ?? ""))} className="mt-2 w-full rounded-full bg-gradient-to-r from-cyan-400 via-blue-500 to-violet-600 px-6 py-3 text-sm font-extrabold text-white shadow-[0_6px_20px_#22d3ee25] transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cyan-400 disabled:cursor-not-allowed disabled:opacity-50">{saving ? "Saving…" : "Update Profile"}</button>
+              {error && (
+                <p
+                  role="alert"
+                  className="mb-4 text-sm text-red-600 dark:text-red-400"
+                >
+                  {error}
+                </p>
+              )}
+              <button
+                type="submit"
+                disabled={
+                  saving ||
+                  !fullName.trim() ||
+                  (fullName.trim() === user?.fullName &&
+                    email.trim() === user?.email &&
+                    phoneNumber.trim() === (user?.phoneNumber ?? ""))
+                }
+                className="mt-2 w-full rounded-full bg-gradient-to-r from-cyan-400 via-blue-500 to-violet-600 px-6 py-3 text-sm font-extrabold text-white shadow-[0_6px_20px_#22d3ee25] transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {saving ? "Saving…" : "Update Profile"}
+              </button>
             </form>
-          </>}
+          </>
+        )}
       </div>
     </section>
   );

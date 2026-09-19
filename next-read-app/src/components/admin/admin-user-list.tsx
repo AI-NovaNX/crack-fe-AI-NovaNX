@@ -146,7 +146,9 @@ export function AdminUserList({
       });
       if (!response.ok) {
         const body = await response.json().catch(() => null);
-        throw new Error(body?.message || "The member could not be deactivated.");
+        throw new Error(
+          body?.message || "The member could not be deactivated.",
+        );
       }
       setUsers((current) => current.filter((user) => user.id !== target.id));
       setMeta((current) => ({
@@ -388,8 +390,8 @@ export function AdminUserList({
             Deactivate {deactivating?.fullName}?
           </AlertDialogTitle>
           <AlertDialogDescription className="mt-2">
-            This member will no longer be able to sign in or borrow books.
-            This action cannot be undone.
+            This member will no longer be able to sign in or borrow books. This
+            action cannot be undone.
           </AlertDialogDescription>
           <div className="mt-6 flex justify-end gap-2">
             <AlertDialogCancel render={<Button variant="outline" />}>

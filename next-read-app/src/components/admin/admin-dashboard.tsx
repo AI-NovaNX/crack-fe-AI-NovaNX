@@ -172,7 +172,9 @@ export function AdminDashboard() {
         const failedResponse = responses.findIndex((response) => !response.ok);
         if (failedResponse >= 0) {
           const body = bodies[failedResponse] as { message?: string } | null;
-          throw new Error(body?.message ?? "The dashboard could not be loaded.");
+          throw new Error(
+            body?.message ?? "The dashboard could not be loaded.",
+          );
         }
         setAuthorStatistics(
           Array.isArray(bodies[1]) ? (bodies[1] as AuthorStatistic[]) : [],

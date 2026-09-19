@@ -49,8 +49,7 @@ export function readFavoriteAuthors(userId: number): Author[] {
   if (!raw) return [];
 
   const data: unknown = JSON.parse(raw);
-  if (!Array.isArray(data))
-    throw new Error("Invalid favorite authors data.");
+  if (!Array.isArray(data)) throw new Error("Invalid favorite authors data.");
 
   return data.filter(
     (author): author is Author =>

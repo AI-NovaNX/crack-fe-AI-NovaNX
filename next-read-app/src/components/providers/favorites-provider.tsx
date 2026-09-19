@@ -70,7 +70,9 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
         }
 
         if (!response.ok) {
-          throw new Error(body.message || "Your account status could not be verified.");
+          throw new Error(
+            body.message || "Your account status could not be verified.",
+          );
         }
 
         const storedBooks = readFavorites(body.user.id);
@@ -84,7 +86,9 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
       } catch (e) {
         if (signal.aborted) return;
         setError(
-          e instanceof Error ? e.message : "Your favorites could not be loaded.",
+          e instanceof Error
+            ? e.message
+            : "Your favorites could not be loaded.",
         );
         setStatus("error");
       }

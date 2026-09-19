@@ -91,19 +91,27 @@ export async function PATCH(request: NextRequest, context: Context) {
   if ((await context.params).action !== "profile")
     return json({ message: "Not found" }, 404);
   const body = await request.json().catch(() => null);
-  const fullName = typeof body?.fullName === "string" ? body.fullName.trim() : "";
+  const fullName =
+    typeof body?.fullName === "string" ? body.fullName.trim() : "";
   const email = typeof body?.email === "string" ? body.email.trim() : "";
   const phoneNumber =
     typeof body?.phoneNumber === "string" ? body.phoneNumber.trim() : "";
   if (!fullName || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
-    return json({ message: "Please enter a name and a valid email address." }, 400);
+    return json(
+      { message: "Please enter a name and a valid email address." },
+      400,
+    );
   try {
     // Refresh an expired session before sending the authenticated update.
     await profile();
     const user = await apiRequest<User>("/me", {
       method: "PATCH",
       headers: { Authorization: `Bearer ${await accessToken()}` },
-      body: JSON.stringify({ fullName, email, phoneNumber: phoneNumber || null }),
+      body: JSON.stringify({
+        fullName,
+        email,
+        phoneNumber: phoneNumber || null,
+      }),
     });
     return json({ user });
   } catch (error) {
@@ -149,10 +157,7 @@ export async function POST(request: NextRequest, context: Context) {
           typeof uploadBody.message === "string"
             ? uploadBody.message
             : "The avatar could not be uploaded.";
-        throw new ApiError(
-          uploadResponse.status,
-          errorMessage,
-        );
+        throw new ApiError(uploadResponse.status, errorMessage);
       }
       const user = uploadBody as User | null;
       if (!user?.avatar)

@@ -167,7 +167,8 @@ export function CheckoutContent() {
         />
         <h2 className="text-2xl font-extrabold">Loan successful!</h2>
         <p className="mt-3 text-palette-slate-400">
-          {data?.items.length} book(s) borrowed successfully for {duration} days.
+          {data?.items.length} book(s) borrowed successfully for {duration}{" "}
+          days.
         </p>
         <Link href="/borrowed" className={`${action} mt-6`}>
           Borrowed List
