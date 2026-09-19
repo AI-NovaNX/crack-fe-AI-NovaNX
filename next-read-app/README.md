@@ -5,6 +5,10 @@ TypeScript, Tailwind CSS, and shadcn/ui. The current app focuses on the user
 book discovery flow: browsing recommended books, filtering the book list,
 searching books, and opening author-specific book pages.
 
+## Live Demo
+
+[Open NexRead](https://nexread.ai-novanx.online/)
+
 ## Tech Stack
 
 - Next.js 16 with App Router
