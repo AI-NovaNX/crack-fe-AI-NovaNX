@@ -99,7 +99,11 @@ function loanDuration(loan: AdminLoan) {
   return Math.max(1, Math.ceil((end - start) / 86_400_000));
 }
 
-export function AdminLoanList() {
+export function AdminLoanList({ initialFilter }: { initialFilter?: string }) {
+  const requestedFilter = initialFilter?.toUpperCase();
+  const startingFilter = filters.some((item) => item.value === requestedFilter)
+    ? (requestedFilter as StatusFilter)
+    : "ALL";
   const [loans, setLoans] = useState<AdminLoan[]>([]);
   const [meta, setMeta] = useState<PaginationMeta>({
     page: 1,
@@ -107,7 +111,7 @@ export function AdminLoanList() {
     total: 0,
     totalPages: 1,
   });
-  const [filter, setFilter] = useState<StatusFilter>("ALL");
+  const [filter, setFilter] = useState<StatusFilter>(startingFilter);
   const [searchInput, setSearchInput] = useState("");
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);

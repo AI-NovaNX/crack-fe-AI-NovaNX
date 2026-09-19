@@ -7,12 +7,12 @@ import { getApiErrorMessage } from "@/lib/error-message";
 import { getCategories } from "@/services/categories";
 import type { Category } from "@/types/category";
 
-function CategoryCard({ name, subtitle, icon }: Category) {
+function CategoryCard({ id, name, subtitle, icon }: Category) {
   return (
     <Link
       href={{
         pathname: "/book-list",
-        query: { category: name },
+        query: { category: id },
       }}
       className="min-w-[168px] flex-1"
       aria-label={`View ${name} books`}

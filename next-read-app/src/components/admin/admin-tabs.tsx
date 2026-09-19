@@ -2,10 +2,11 @@ import Link from "next/link";
 
 import { cn } from "@/lib/utils";
 
-type AdminTab = "users" | "loans" | "books";
+type AdminTab = "dashboard" | "users" | "loans" | "books";
 
 const tabs: Array<{ id: AdminTab; label: string; href: string }> = [
-  { id: "users", label: "User List", href: "/admin/dashboard" },
+  { id: "dashboard", label: "Overview", href: "/admin/dashboard" },
+  { id: "users", label: "User List", href: "/admin/users" },
   { id: "loans", label: "Borrowed List", href: "/admin/loans" },
   { id: "books", label: "Book List", href: "/admin/books" },
 ];

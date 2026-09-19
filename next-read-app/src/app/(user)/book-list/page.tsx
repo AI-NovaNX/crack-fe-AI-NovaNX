@@ -90,9 +90,10 @@ const getCategoryFilters = async ({
   },
   ...(await getCategories()).map((category) => ({
     label: category.name,
-    active: category.name === selectedCategory,
+    active:
+      category.id === selectedCategory || category.name === selectedCategory,
     href: buildBookListHref({
-      category: category.name,
+      category: category.id,
       rating: selectedRating,
       search: searchQuery,
     }),
@@ -263,7 +264,12 @@ function BookCard({
   return (
     <BookHoverCard className="relative h-full rounded-[28px] border border-palette-indigo-300-20 bg-palette-slate-900-80 p-0 py-0 shadow-none ring-0 transition-all duration-200 hover:border-palette-cyan-300 hover:bg-gray-800">
       <CardContent className="flex h-full flex-col px-5 py-5">
-        <AnimatedBook title={title} author={author} coverUrl={coverUrl} coverClassName={coverClassName} />
+        <AnimatedBook
+          title={title}
+          author={author}
+          coverUrl={coverUrl}
+          coverClassName={coverClassName}
+        />
 
         <div className="flex flex-1 flex-col pt-5">
           <h4 className="text-[18px] leading-6 font-extrabold text-palette-slate-50">

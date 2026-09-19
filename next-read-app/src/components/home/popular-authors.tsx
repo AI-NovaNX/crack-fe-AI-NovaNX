@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { Card, CardContent } from "@/components/ui/card";
+import { buttonVariants } from "@/components/ui/button";
 import { CatalogUnavailable } from "@/components/shared/catalog-unavailable";
 import { FavoriteAuthorButton } from "@/components/shared/favorite-author-button";
 import { getApiErrorMessage } from "@/lib/error-message";
@@ -89,7 +90,22 @@ export async function PopularAuthors() {
     <section className="w-full pb-10">
       <Card className="min-h-[224px] w-full rounded-[32px] border border-palette-indigo-300-20 bg-gray-200 p-0 py-0 font-outfit text-palette-slate-50 shadow-none ring-0">
         <CardContent className="px-7 py-8">
-          <h2 className="text-2xl leading-8 font-extrabold">Popular Authors</h2>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-2xl leading-8 font-extrabold">
+              Popular Authors
+            </h2>
+            <Link
+              href="/authors"
+              className={buttonVariants({
+                variant: "outline",
+                size: "sm",
+                className:
+                  "rounded-full border-palette-indigo-300-20 bg-white/5 text-palette-slate-50 hover:border-palette-cyan-300 hover:bg-cyan-300/10",
+              })}
+            >
+              View all authors
+            </Link>
+          </div>
           <p className="max-w-[620px] pt-2 text-sm leading-6 font-medium text-palette-slate-400">
             ❤️ Follow your favorite authors to receive notifications when new
             books become available.

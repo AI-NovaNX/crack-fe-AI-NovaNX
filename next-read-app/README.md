@@ -85,7 +85,7 @@ npm run start
 - `/book-list?rating=4` - book list filtered by rating group
 - `/book-list?search=white%20fang` - book list filtered by search query
 - `/authors/[id]` - books by selected author
-- `/admin/dashboard` - admin dashboard placeholder
+- `/admin/dashboard` - admin analytics dashboard
 - `/admin/books` - admin books placeholder
 - `/admin/authors` - admin authors placeholder
 - `/admin/categories` - admin categories placeholder
@@ -93,7 +93,7 @@ npm run start
 - `/admin/reports` - admin reports placeholder
 - `/admin/reviews` - admin reviews placeholder
 - `/admin/settings` - admin settings placeholder
-- `/admin/users` - admin users placeholder
+- `/admin/users` - admin user list
 
 ## Project Structure
 
