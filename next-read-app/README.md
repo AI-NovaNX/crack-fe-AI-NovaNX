@@ -13,6 +13,11 @@ management for administrators.
 
 ![NexRead application preview](public/Nexread.png)
 
+<figure>
+  <img src="public/Admin-Nexread.png" alt="Admin Nexread application" />
+  <figcaption>Aplikasi Admin Nexread.</figcaption>
+</figure>
+
 ## Tech Stack
 
 - Next.js 16 with App Router
