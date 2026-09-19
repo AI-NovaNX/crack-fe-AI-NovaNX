@@ -41,6 +41,10 @@ yarn-error.log*
 
 # local editor and MCP configuration
 **/.vscode/mcp.json
+.continue/
+
+# local assets not part of the app
+Cover-Buku-13-Judul/
 
 # typescript
 *.tsbuildinfo
