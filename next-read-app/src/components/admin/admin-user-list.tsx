@@ -1,9 +1,19 @@
 "use client";
 
+import { Search } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { getAvatarSrc, getInitials } from "@/lib/avatar";
 import { normalizeRole } from "@/lib/roles";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 
 type AdminUser = {
   id: number;
@@ -55,6 +65,7 @@ export function AdminUserList() {
     totalPages: 1,
   });
   const [page, setPage] = useState(1);
+  const [query, setQuery] = useState("");
   const [attempt, setAttempt] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -66,10 +77,15 @@ export function AdminUserList() {
       setLoading(true);
       setError("");
       try {
-        const response = await fetch(
-          `/api/admin/users?page=${page}&limit=${PAGE_SIZE}`,
-          { cache: "no-store", signal: controller.signal },
-        );
+        const params = new URLSearchParams({
+          page: String(page),
+          limit: String(PAGE_SIZE),
+        });
+        if (query.trim()) params.set("q", query.trim());
+        const response = await fetch(`/api/admin/users?${params}`, {
+          cache: "no-store",
+          signal: controller.signal,
+        });
         const body = (await response.json().catch(() => null)) as
           | UsersResponse
           | { message?: string }
@@ -99,7 +115,7 @@ export function AdminUserList() {
 
     void loadUsers();
     return () => controller.abort();
-  }, [attempt, page]);
+  }, [attempt, page, query]);
 
   return (
     <>
@@ -118,6 +134,19 @@ export function AdminUserList() {
         </span>
       </div>
 
+      <div className="mt-6 flex max-w-md items-center gap-2 rounded-lg border border-palette-indigo-300-20 bg-secondary px-3">
+        <Search className="size-4 text-palette-slate-400" aria-hidden="true" />
+        <Input
+          value={query}
+          onChange={(event) => {
+            setPage(1);
+            setQuery(event.target.value);
+          }}
+          placeholder="Search users..."
+          className="border-0 bg-transparent shadow-none focus-visible:ring-0"
+        />
+      </div>
+
       <div className="mt-7 overflow-hidden rounded-[28px] border border-palette-indigo-300-20 bg-gray-200 shadow-[0_28px_70px_-32px_rgba(0,0,0,0.6)]">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[780px] border-collapse text-left">
@@ -126,17 +155,30 @@ export function AdminUserList() {
             </caption>
             <thead className="bg-white/5 font-mono text-[9px] tracking-[0.2em] text-palette-slate-400 uppercase">
               <tr>
-                <th scope="col" className="px-7 py-5 font-medium">User</th>
-                <th scope="col" className="px-5 py-5 font-medium">Email</th>
-                <th scope="col" className="px-5 py-5 font-medium">Phone</th>
-                <th scope="col" className="px-5 py-5 font-medium">Joined</th>
-                <th scope="col" className="px-7 py-5 text-right font-medium">Role</th>
+                <th scope="col" className="px-7 py-5 font-medium">
+                  User
+                </th>
+                <th scope="col" className="px-5 py-5 font-medium">
+                  Email
+                </th>
+                <th scope="col" className="px-5 py-5 font-medium">
+                  Phone
+                </th>
+                <th scope="col" className="px-5 py-5 font-medium">
+                  Joined
+                </th>
+                <th scope="col" className="px-7 py-5 text-right font-medium">
+                  Role
+                </th>
               </tr>
             </thead>
             <tbody className="text-xs">
               {loading ? (
                 Array.from({ length: 5 }, (_, index) => (
-                  <tr key={index} className="border-t border-palette-indigo-300-20">
+                  <tr
+                    key={index}
+                    className="border-t border-palette-indigo-300-20"
+                  >
                     <td colSpan={5} className="px-7 py-5">
                       <div className="h-10 animate-pulse rounded-xl bg-white/5" />
                     </td>
@@ -144,7 +186,10 @@ export function AdminUserList() {
                 ))
               ) : error ? (
                 <tr className="border-t border-palette-indigo-300-20">
-                  <td colSpan={5} className="px-7 py-14 text-center text-red-300">
+                  <td
+                    colSpan={5}
+                    className="px-7 py-14 text-center text-red-300"
+                  >
                     <p>{error}</p>
                     <button
                       type="button"
@@ -157,7 +202,10 @@ export function AdminUserList() {
                 </tr>
               ) : users.length === 0 ? (
                 <tr className="border-t border-palette-indigo-300-20">
-                  <td colSpan={5} className="px-7 py-14 text-center text-palette-slate-400">
+                  <td
+                    colSpan={5}
+                    className="px-7 py-14 text-center text-palette-slate-400"
+                  >
                     Belum ada pengguna terdaftar.
                   </td>
                 </tr>
@@ -165,21 +213,41 @@ export function AdminUserList() {
                 users.map((user, index) => {
                   const avatarSrc = getAvatarSrc(user.avatar);
                   return (
-                    <tr key={user.id} className="border-t border-palette-indigo-300-20 transition-colors hover:bg-white/[0.035]">
-                      <th scope="row" className="px-7 py-5 font-extrabold whitespace-nowrap">
+                    <tr
+                      key={user.id}
+                      className="border-t border-palette-indigo-300-20 transition-colors hover:bg-white/[0.035]"
+                    >
+                      <th
+                        scope="row"
+                        className="px-7 py-5 font-extrabold whitespace-nowrap"
+                      >
                         <span className="flex items-center gap-3">
-                          <span className={`flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br ${avatarGradients[index % avatarGradients.length]} text-[10px] font-extrabold text-white shadow-lg`}>
+                          <span
+                            className={`flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br ${avatarGradients[index % avatarGradients.length]} text-[10px] font-extrabold text-white shadow-lg`}
+                          >
                             {avatarSrc ? (
                               // eslint-disable-next-line @next/next/no-img-element
-                              <img src={avatarSrc} alt="" className="h-full w-full object-cover" />
-                            ) : getInitials(user.fullName)}
+                              <img
+                                src={avatarSrc}
+                                alt=""
+                                className="h-full w-full object-cover"
+                              />
+                            ) : (
+                              getInitials(user.fullName)
+                            )}
                           </span>
                           {user.fullName}
                         </span>
                       </th>
-                      <td className="px-5 py-5 text-palette-slate-400">{user.email}</td>
-                      <td className="px-5 py-5 whitespace-nowrap text-palette-slate-400">{user.phoneNumber || "—"}</td>
-                      <td className="px-5 py-5 whitespace-nowrap text-palette-slate-400">{formatJoinedDate(user.createdAt)}</td>
+                      <td className="px-5 py-5 text-palette-slate-400">
+                        {user.email}
+                      </td>
+                      <td className="px-5 py-5 whitespace-nowrap text-palette-slate-400">
+                        {user.phoneNumber || "—"}
+                      </td>
+                      <td className="px-5 py-5 whitespace-nowrap text-palette-slate-400">
+                        {formatJoinedDate(user.createdAt)}
+                      </td>
                       <td className="px-7 py-5 text-right">
                         <span className="inline-flex rounded-full border border-violet-400/30 bg-violet-400/10 px-3 py-1 text-[9px] font-extrabold text-violet-200 capitalize">
                           {normalizeRole(user.role)}
@@ -195,16 +263,55 @@ export function AdminUserList() {
       </div>
 
       {!loading && !error && meta.totalPages > 1 && (
-        <nav aria-label="User list pagination" className="mt-5 flex items-center justify-end gap-3 text-xs">
-          <button type="button" disabled={page <= 1} onClick={() => setPage((value) => value - 1)} className="pagination-button disabled:cursor-not-allowed disabled:opacity-40">
+        <nav
+          aria-label="User list pagination"
+          className="mt-5 flex items-center justify-end gap-3 text-xs"
+        >
+          <button
+            type="button"
+            disabled={page <= 1}
+            onClick={() => setPage((value) => value - 1)}
+            className="pagination-button disabled:cursor-not-allowed disabled:opacity-40"
+          >
             Previous
           </button>
-          <span className="text-palette-slate-400">Page {meta.page} of {meta.totalPages}</span>
-          <button type="button" disabled={page >= meta.totalPages} onClick={() => setPage((value) => value + 1)} className="pagination-button disabled:cursor-not-allowed disabled:opacity-40">
+          <span className="text-palette-slate-400">
+            Page {meta.page} of {meta.totalPages}
+          </span>
+          <button
+            type="button"
+            disabled={page >= meta.totalPages}
+            onClick={() => setPage((value) => value + 1)}
+            className="pagination-button disabled:cursor-not-allowed disabled:opacity-40"
+          >
             Next
           </button>
         </nav>
       )}
+
+      <Dialog
+        open={Boolean(error)}
+        onOpenChange={(open) => !open && setError("")}
+      >
+        <DialogContent className="border-red-400/40 bg-card">
+          <DialogTitle>Users unavailable</DialogTitle>
+          <DialogDescription className="mt-2 text-palette-slate-400">
+            {error}
+          </DialogDescription>
+          <div className="mt-6 flex justify-end gap-2">
+            <DialogClose render={<Button variant="outline" />}>
+              Close
+            </DialogClose>
+            <DialogClose
+              render={
+                <Button onClick={() => setAttempt((value) => value + 1)} />
+              }
+            >
+              Try again
+            </DialogClose>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

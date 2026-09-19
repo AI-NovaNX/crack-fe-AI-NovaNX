@@ -6,11 +6,12 @@ import { useRouter } from "next/navigation";
 import { submitAuth } from "@/lib/auth";
 import Link from "next/link";
 import { useState } from "react";
-import { BookOpen, Heart, ShoppingCart } from "lucide-react";
+import { Heart, ShoppingCart } from "lucide-react";
 
 import bellIcon from "@/assets/icons/BookListCategory/Icon-2.svg";
 import nexReadLogo from "@/assets/icons/BookListCategory/source/image.png";
 import { HeaderSearch } from "@/components/layout/header-search";
+import { UserOverdueNotification } from "@/components/layout/user-overdue-notification";
 import { useToast } from "@/components/providers/app-feedback-provider";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -102,17 +103,6 @@ export const UserNav = ({
 
       <div className="relative z-10 ml-auto flex min-h-8 max-w-full shrink-0 flex-nowrap items-center justify-end gap-1 text-center text-[10px] text-foreground sm:min-h-14 sm:gap-3">
         <Link
-          href="/authors"
-          className={cn(
-            buttonVariants({ variant: "outline", size: "sm" }),
-            "h-8 rounded-full border-palette-indigo-300-20 bg-secondary px-3 text-palette-slate-50 hover:border-palette-cyan-300 hover:bg-accent sm:h-10 sm:px-4",
-          )}
-        >
-          <BookOpen aria-hidden="true" />
-          <span>Authors</span>
-        </Link>
-
-        <Link
           href="/cart"
           aria-label={`Open cart with ${cartCount} items`}
           className={cn(
@@ -131,21 +121,7 @@ export const UserNav = ({
           )}
         </Link>
 
-        <Link
-          href="/profile"
-          aria-label="Open notifications"
-          className={cn(
-            buttonVariants({ variant: "outline", size: "icon" }),
-            "box-border h-8 w-8 rounded-full border-[0.9px] border-solid border-palette-indigo-300-20 bg-secondary shadow-[inset_0_0_0_1px_rgba(255,_255,_255,_0.04)] backdrop-blur-xl hover:border-palette-cyan-300 hover:bg-accent sm:h-14 sm:w-14 sm:rounded-num-30504000",
-          )}
-        >
-          <Image
-            src={bellIcon}
-            alt=""
-            className="size-3.5"
-            aria-hidden="true"
-          />
-        </Link>
+        <UserOverdueNotification />
 
         <ThemeToggle />
 

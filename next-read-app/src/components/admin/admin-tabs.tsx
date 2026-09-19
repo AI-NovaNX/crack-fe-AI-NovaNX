@@ -2,13 +2,23 @@ import Link from "next/link";
 
 import { cn } from "@/lib/utils";
 
-type AdminTab = "dashboard" | "users" | "loans" | "books";
+type AdminTab =
+  | "dashboard"
+  | "users"
+  | "loans"
+  | "books"
+  | "authors"
+  | "categories"
+  | "reviews";
 
 const tabs: Array<{ id: AdminTab; label: string; href: string }> = [
   { id: "dashboard", label: "Overview", href: "/admin/dashboard" },
   { id: "users", label: "User List", href: "/admin/users" },
   { id: "loans", label: "Borrowed List", href: "/admin/loans" },
   { id: "books", label: "Book List", href: "/admin/books" },
+  { id: "authors", label: "Authors", href: "/admin/authors" },
+  { id: "categories", label: "Categories", href: "/admin/categories" },
+  { id: "reviews", label: "Reviews", href: "/admin/reviews" },
 ];
 
 export function AdminTabs({ active }: { active: AdminTab }) {

@@ -208,6 +208,20 @@ export function AdminDashboard() {
     return () => controller.abort();
   }, [attempt]);
 
+  const rankedAuthors = [...authorStatistics]
+    .sort(
+      (first, second) =>
+        second.averageBookRating - first.averageBookRating ||
+        second.booksCount - first.booksCount ||
+        first.name.localeCompare(second.name),
+    )
+    .slice(0, 5);
+  const rankedCategories = [...categoryStatistics].sort(
+    (first, second) =>
+      second.booksCount - first.booksCount ||
+      first.name.localeCompare(second.name),
+  );
+
   return (
     <>
       <div className="flex flex-wrap items-end justify-between gap-4">
@@ -377,7 +391,7 @@ export function AdminDashboard() {
               Author performance
             </CardTitle>
             <CardDescription className="text-palette-slate-400">
-              Authors ranked by the size and rating of their catalog.
+              Authors ranked by highest average book rating.
             </CardDescription>
           </CardHeader>
           <CardContent className="px-6 py-3">
@@ -390,9 +404,9 @@ export function AdminDashboard() {
                   />
                 ))}
               </div>
-            ) : authorStatistics.length ? (
+            ) : rankedAuthors.length ? (
               <ol>
-                {authorStatistics.slice(0, 5).map((author, index) => (
+                {rankedAuthors.map((author, index) => (
                   <li
                     key={author.id}
                     className="flex items-center gap-3 border-b border-palette-indigo-300-20 py-3 last:border-0"
@@ -439,7 +453,7 @@ export function AdminDashboard() {
               </div>
             ) : categoryStatistics.length ? (
               <div className="space-y-3">
-                {categoryStatistics.map((category) => {
+                {rankedCategories.map((category) => {
                   const percentage = data?.books
                     ? Math.min(100, (category.booksCount / data.books) * 100)
                     : 0;

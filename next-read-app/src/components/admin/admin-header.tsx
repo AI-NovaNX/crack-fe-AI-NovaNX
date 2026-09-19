@@ -45,11 +45,14 @@ export function AdminHeader({ user }: AdminHeaderProps) {
   const [loggingOut, setLoggingOut] = useState(false);
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
   const [pendingReturns, setPendingReturns] = useState(0);
+  const [notificationError, setNotificationError] = useState("");
+  const [notificationRetry, setNotificationRetry] = useState(0);
 
   useEffect(() => {
     const controller = new AbortController();
 
     async function loadPendingReturns() {
+      setNotificationError("");
       try {
         const response = await fetch(
           "/api/admin/loans?status=RETURN_REQUESTED&page=1&limit=1",
@@ -58,13 +61,17 @@ export function AdminHeader({ user }: AdminHeaderProps) {
         const body = (await response.json().catch(() => null)) as {
           meta?: { total?: number };
         } | null;
-        if (response.ok) {
-          setPendingReturns(
-            typeof body?.meta?.total === "number" ? body.meta.total : 0,
-          );
+        if (!response.ok) {
+          throw new Error("Notifikasi return belum dapat dimuat.");
         }
+        setPendingReturns(
+          typeof body?.meta?.total === "number" ? body.meta.total : 0,
+        );
       } catch {
-        if (!controller.signal.aborted) setPendingReturns(0);
+        if (!controller.signal.aborted) {
+          setPendingReturns(0);
+          setNotificationError("Notifikasi return belum dapat dimuat.");
+        }
       }
     }
 
@@ -74,7 +81,7 @@ export function AdminHeader({ user }: AdminHeaderProps) {
       controller.abort();
       window.clearInterval(interval);
     };
-  }, []);
+  }, [notificationRetry]);
 
   async function logout() {
     setLoggingOut(true);
@@ -128,13 +135,25 @@ export function AdminHeader({ user }: AdminHeaderProps) {
           <DropdownMenuContent
             align="end"
             sideOffset={8}
-            className="w-80 rounded-2xl border border-palette-indigo-300-20 bg-card p-2 text-palette-slate-50 shadow-2xl ring-0"
+            className="w-80 rounded-2xl border border-palette-indigo-300-20 bg-white p-2 text-palette-slate-50 shadow-2xl ring-0 dark:bg-[#151236]"
           >
             <DropdownMenuGroup>
               <DropdownMenuLabel className="px-3 py-2 text-[10px] tracking-[0.18em] text-palette-slate-400 uppercase">
                 Notifications
               </DropdownMenuLabel>
-              {pendingReturns > 0 ? (
+              {notificationError ? (
+                <>
+                  <p className="px-3 py-4 text-center text-xs text-rose-300">
+                    {notificationError}
+                  </p>
+                  <DropdownMenuItem
+                    onClick={() => setNotificationRetry((value) => value + 1)}
+                    className="justify-center rounded-xl bg-white/5 text-xs font-bold text-palette-slate-50 hover:bg-cyan-400/10"
+                  >
+                    Try again
+                  </DropdownMenuItem>
+                </>
+              ) : pendingReturns > 0 ? (
                 <DropdownMenuLinkItem
                   render={<Link href="/admin/loans?status=RETURN_REQUESTED" />}
                   className="mt-1 rounded-xl border border-amber-400/20 bg-amber-400/10 px-3 py-3 text-left hover:bg-amber-400/15"

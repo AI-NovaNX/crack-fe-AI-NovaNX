@@ -62,7 +62,7 @@ function mapStatus(value: unknown, dueDate: string | null): LoanStatus {
     return "returned";
   if (
     normalized.includes("overdue") ||
-    (dueDate && new Date(dueDate) < new Date())
+    (dueDate && new Date(dueDate).getTime() + 86_400_000 <= Date.now())
   )
     return "overdue";
   return "active";
@@ -288,16 +288,20 @@ function LoanCard({
 
 type BorrowedListProps = {
   initialTab?: "profile" | "borrowed" | "reviews";
+  initialFilter?: "all" | LoanStatus;
 };
 
-export function BorrowedList({ initialTab = "borrowed" }: BorrowedListProps) {
+export function BorrowedList({
+  initialTab = "borrowed",
+  initialFilter = "all",
+}: BorrowedListProps) {
   const [loans, setLoans] = useState<Loan[]>([]);
   const [status, setStatus] = useState<"loading" | "ready" | "login" | "error">(
     "loading",
   );
   const [error, setError] = useState("");
   const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState<"all" | LoanStatus>("all");
+  const [filter, setFilter] = useState<"all" | LoanStatus>(initialFilter);
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
   const [reviewBook, setReviewBook] = useState<Loan["book"] | null>(null);
   const [returnLoan, setReturnLoan] = useState<Loan | null>(null);
