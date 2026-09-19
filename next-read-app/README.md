@@ -1,9 +1,9 @@
 # NexRead
 
-NexRead is a futuristic library web application built with Next.js, React,
-TypeScript, Tailwind CSS, and shadcn/ui. The current app focuses on the user
-book discovery flow: browsing recommended books, filtering the book list,
-searching books, and opening author-specific book pages.
+NexRead is a library web application built with Next.js, React, TypeScript,
+Tailwind CSS, and shadcn/ui. It supports book discovery and borrowing flows
+for readers, plus protected catalog, loan, user, author, category, and review
+management for administrators.
 
 ## Live Demo
 
@@ -22,11 +22,13 @@ searching books, and opening author-specific book pages.
 - shadcn/ui components
 - lucide-react icons
 - React Hook Form for auth form handling
-- Railway staging API for books, authors, categories, and authentication
+- Railway staging API for catalog, authentication, user, loan, cart, and
+  review data
 
 ## Current Features
 
-- Authentication pages for login and registration.
+- Authentication pages for login and registration, backed by HttpOnly session
+  cookies.
 - Shared user header with NexRead logo, search form, cart action,
   notification action, profile action, and dark/light theme toggle.
 - Header search waits 400 ms after typing, then updates `/book-list?search=...`; Enter or Search submits immediately. Existing category/rating filters are preserved. It filters books by
@@ -45,6 +47,17 @@ searching books, and opening author-specific book pages.
   - Shared book card styling
 - Popular Authors cards link to author detail pages.
 - Author detail page shows author summary and books by selected author.
+- Reader flows for cart, checkout, loan history, profile, and personal reviews.
+- Protected admin dashboard with catalog and borrowing analytics.
+- Admin book management with listing, search, availability filtering, create,
+  edit, detail, and delete actions.
+- Admin loan list with status filtering, search, pagination, and return
+  approval.
+- Admin user list with pagination and backend search.
+- Admin author and category management with search, pagination, create, edit,
+  delete confirmation, toast feedback, and error dialogs.
+- Admin review management with search, pagination, review deletion controls,
+  confirmation dialogs, and error dialogs.
 - Author API data includes author id, name, book count, borrow count, rating,
   and avatar asset.
 - Book API data includes title, author, category, rating, and cover gradient.
@@ -86,14 +99,14 @@ npm run start
 - `/book-list?search=white%20fang` - book list filtered by search query
 - `/authors/[id]` - books by selected author
 - `/admin/dashboard` - admin analytics dashboard
-- `/admin/books` - admin books placeholder
-- `/admin/authors` - admin authors placeholder
-- `/admin/categories` - admin categories placeholder
-- `/admin/loans` - admin loans placeholder
+- `/admin/books` - book management
+- `/admin/authors` - author management
+- `/admin/categories` - category management
+- `/admin/loans` - loan management and return approval
 - `/admin/reports` - admin reports placeholder
-- `/admin/reviews` - admin reviews placeholder
+- `/admin/reviews` - review management
 - `/admin/settings` - admin settings placeholder
-- `/admin/users` - admin user list
+- `/admin/users` - user list and search
 
 ## Project Structure
 
@@ -170,9 +183,22 @@ loading skeletons, status-aware API messages, success/error toasts, route error
 boundaries, and a confirmation modal before logout. Ordinary network failures
 remain inline so they do not interrupt the user's work.
 
-Existing cart, checkout, loans, profile, reviews, admin and other placeholder
-pages still need their own UI/API implementation; connecting the catalog and
-authentication does not make those placeholder features functional.
+Admin routes and `/api/admin/*` are protected by the same middleware. The
+middleware verifies the session through `/me`, allows only the `admin` role,
+and forwards the short-lived access token to same-origin Next.js API proxies.
+Those proxies keep the token out of browser JavaScript and validate `Origin`
+for mutation requests.
+
+The backend currently does not expose a global `GET /reviews` endpoint. The
+admin review proxy tries that endpoint first, then falls back to collecting
+reviews from each book detail response. This keeps the review list available,
+but it is less efficient for a large catalog. Review deletion still requires a
+backend `DELETE /reviews/:id` endpoint; if the backend uses another path, adapt
+`src/app/api/admin/reviews/route.ts` to that contract.
+
+Reports and Settings remain placeholders. Any unimplemented backend capability
+is surfaced with inline feedback or an accessible error dialog rather than
+mocked data.
 
 ## Styling Notes
 
@@ -191,4 +217,5 @@ authentication does not make those placeholder features functional.
 - Put route-specific filtering state in search params when the result should be
   shareable or reload-safe.
 - Keep API calls and response mapping in `src/services`.
+- Keep admin-only browser requests behind `src/app/api/admin` route handlers.
 - Keep supported book cover styles in `src/lib/book-covers.ts` so Tailwind includes API-provided styles in the build.
