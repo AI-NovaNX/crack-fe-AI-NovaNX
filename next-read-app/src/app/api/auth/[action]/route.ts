@@ -96,7 +96,7 @@ export async function PATCH(request: NextRequest, context: Context) {
   const phoneNumber =
     typeof body?.phoneNumber === "string" ? body.phoneNumber.trim() : "";
   if (!fullName || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
-    return json({ message: "Isi nama dan alamat email yang valid." }, 400);
+    return json({ message: "Please enter a name and a valid email address." }, 400);
   try {
     // Refresh an expired session before sending the authenticated update.
     await profile();
@@ -124,11 +124,11 @@ export async function POST(request: NextRequest, context: Context) {
       const formData = await request.formData();
       const file = formData.get("avatar") ?? formData.get("file");
       if (!(file instanceof File))
-        return json({ message: "Pilih gambar avatar terlebih dahulu." }, 400);
+        return json({ message: "Please select an avatar image first." }, 400);
       if (!acceptedAvatarTypes.has(file.type))
-        return json({ message: "Gunakan file JPG, PNG, WEBP, atau GIF." }, 400);
+        return json({ message: "Use a JPG, PNG, WEBP, or GIF file." }, 400);
       if (file.size > maxAvatarSize)
-        return json({ message: "Ukuran gambar maksimal 5 MB." }, 400);
+        return json({ message: "The image must be at most 5 MB." }, 400);
 
       const uploadFormData = new FormData();
       uploadFormData.set("avatar", file);
@@ -148,7 +148,7 @@ export async function POST(request: NextRequest, context: Context) {
           "message" in uploadBody &&
           typeof uploadBody.message === "string"
             ? uploadBody.message
-            : "Avatar belum dapat diunggah.";
+            : "The avatar could not be uploaded.";
         throw new ApiError(
           uploadResponse.status,
           errorMessage,
@@ -156,7 +156,7 @@ export async function POST(request: NextRequest, context: Context) {
       }
       const user = uploadBody as User | null;
       if (!user?.avatar)
-        throw new ApiError(502, "Backend belum mengembalikan path avatar.");
+        throw new ApiError(502, "The backend did not return an avatar path.");
       return json({ user, avatar: user.avatar });
     }
 

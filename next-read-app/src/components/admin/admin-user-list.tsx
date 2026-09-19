@@ -5,6 +5,15 @@ import { useEffect, useState } from "react";
 
 import { getAvatarSrc, getInitials } from "@/lib/avatar";
 import { normalizeRole } from "@/lib/roles";
+import { useToast } from "@/components/providers/app-feedback-provider";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -56,7 +65,12 @@ function formatJoinedDate(value: string) {
   }).format(date);
 }
 
-export function AdminUserList() {
+export function AdminUserList({
+  currentUserId,
+}: {
+  currentUserId?: number | null;
+} = {}) {
+  const toast = useToast();
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [meta, setMeta] = useState<PaginationMeta>({
     page: 1,
@@ -69,6 +83,9 @@ export function AdminUserList() {
   const [attempt, setAttempt] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [deactivating, setDeactivating] = useState<AdminUser | null>(null);
+  const [actionError, setActionError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -94,7 +111,7 @@ export function AdminUserList() {
           throw new Error(
             body && "message" in body && body.message
               ? body.message
-              : "User list belum dapat dimuat.",
+              : "User list could not be loaded.",
           );
         }
         const result = body as UsersResponse;
@@ -106,7 +123,7 @@ export function AdminUserList() {
         setError(
           loadError instanceof Error
             ? loadError.message
-            : "User list belum dapat dimuat.",
+            : "User list could not be loaded.",
         );
       } finally {
         if (!controller.signal.aborted) setLoading(false);
@@ -116,6 +133,42 @@ export function AdminUserList() {
     void loadUsers();
     return () => controller.abort();
   }, [attempt, page, query]);
+
+  async function deactivateUser() {
+    if (!deactivating) return;
+    const target = deactivating;
+    setSubmitting(true);
+    try {
+      const response = await fetch("/api/admin/users", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: target.id }),
+      });
+      if (!response.ok) {
+        const body = await response.json().catch(() => null);
+        throw new Error(body?.message || "The member could not be deactivated.");
+      }
+      setUsers((current) => current.filter((user) => user.id !== target.id));
+      setMeta((current) => ({
+        ...current,
+        total: Math.max(0, current.total - 1),
+      }));
+      toast({
+        title: "Member deactivated successfully",
+        description: target.fullName,
+        variant: "success",
+      });
+    } catch (deactivateErr) {
+      setActionError(
+        deactivateErr instanceof Error
+          ? deactivateErr.message
+          : "The member could not be deactivated.",
+      );
+    } finally {
+      setDeactivating(null);
+      setSubmitting(false);
+    }
+  }
 
   return (
     <>
@@ -151,7 +204,7 @@ export function AdminUserList() {
         <div className="overflow-x-auto">
           <table className="w-full min-w-[780px] border-collapse text-left">
             <caption className="sr-only">
-              Daftar pengguna NexRead yang terdaftar
+              List of registered NexRead users
             </caption>
             <thead className="bg-white/5 font-mono text-[9px] tracking-[0.2em] text-palette-slate-400 uppercase">
               <tr>
@@ -167,8 +220,11 @@ export function AdminUserList() {
                 <th scope="col" className="px-5 py-5 font-medium">
                   Joined
                 </th>
-                <th scope="col" className="px-7 py-5 text-right font-medium">
+                <th scope="col" className="px-5 py-5 font-medium">
                   Role
+                </th>
+                <th scope="col" className="px-7 py-5 text-right font-medium">
+                  Actions
                 </th>
               </tr>
             </thead>
@@ -179,7 +235,7 @@ export function AdminUserList() {
                     key={index}
                     className="border-t border-palette-indigo-300-20"
                   >
-                    <td colSpan={5} className="px-7 py-5">
+                    <td colSpan={6} className="px-7 py-5">
                       <div className="h-10 animate-pulse rounded-xl bg-white/5" />
                     </td>
                   </tr>
@@ -187,7 +243,7 @@ export function AdminUserList() {
               ) : error ? (
                 <tr className="border-t border-palette-indigo-300-20">
                   <td
-                    colSpan={5}
+                    colSpan={6}
                     className="px-7 py-14 text-center text-red-300"
                   >
                     <p>{error}</p>
@@ -203,10 +259,10 @@ export function AdminUserList() {
               ) : users.length === 0 ? (
                 <tr className="border-t border-palette-indigo-300-20">
                   <td
-                    colSpan={5}
+                    colSpan={6}
                     className="px-7 py-14 text-center text-palette-slate-400"
                   >
-                    Belum ada pengguna terdaftar.
+                    No registered users yet.
                   </td>
                 </tr>
               ) : (
@@ -248,10 +304,20 @@ export function AdminUserList() {
                       <td className="px-5 py-5 whitespace-nowrap text-palette-slate-400">
                         {formatJoinedDate(user.createdAt)}
                       </td>
-                      <td className="px-7 py-5 text-right">
+                      <td className="px-5 py-5">
                         <span className="inline-flex rounded-full border border-violet-400/30 bg-violet-400/10 px-3 py-1 text-[9px] font-extrabold text-violet-200 capitalize">
                           {normalizeRole(user.role)}
                         </span>
+                      </td>
+                      <td className="px-7 py-5 text-right">
+                        <button
+                          type="button"
+                          disabled={user.id === currentUserId}
+                          onClick={() => setDeactivating(user)}
+                          className="rounded-full border border-red-300/30 bg-red-400/10 px-4 py-2 text-[10px] font-bold text-red-300 transition hover:bg-red-400/20 disabled:cursor-not-allowed disabled:opacity-40"
+                        >
+                          Deactivate Member
+                        </button>
                       </td>
                     </tr>
                   );
@@ -309,6 +375,52 @@ export function AdminUserList() {
             >
               Try again
             </DialogClose>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog
+        open={Boolean(deactivating)}
+        onOpenChange={(open) => !open && setDeactivating(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogTitle>
+            Deactivate {deactivating?.fullName}?
+          </AlertDialogTitle>
+          <AlertDialogDescription className="mt-2">
+            This member will no longer be able to sign in or borrow books.
+            This action cannot be undone.
+          </AlertDialogDescription>
+          <div className="mt-6 flex justify-end gap-2">
+            <AlertDialogCancel render={<Button variant="outline" />}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              render={
+                <Button
+                  variant="destructive"
+                  disabled={submitting}
+                  onClick={deactivateUser}
+                />
+              }
+            >
+              {submitting ? "Deactivating..." : "Deactivate Member"}
+            </AlertDialogAction>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <Dialog
+        open={Boolean(actionError)}
+        onOpenChange={(open) => !open && setActionError("")}
+      >
+        <DialogContent className="border-red-400/40 bg-card">
+          <DialogTitle>Action unavailable</DialogTitle>
+          <DialogDescription className="mt-2 text-palette-slate-400">
+            {actionError}
+          </DialogDescription>
+          <div className="mt-6 flex justify-end">
+            <DialogClose render={<Button />}>Close</DialogClose>
           </div>
         </DialogContent>
       </Dialog>

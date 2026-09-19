@@ -12,7 +12,7 @@ export default async function BookDetailPage({ params }: { params: Promise<{ id:
   const { id } = await params;
   let book;
   try { book = await getBookDetail(id); }
-  catch (error) { return <main className="mx-auto max-w-[1120px] space-y-8 px-5 py-7"><AppNav /><CatalogUnavailable title="Detail buku belum dapat dimuat" message={getApiErrorMessage(error)} /><Footer /></main>; }
+  catch (error) { return <main className="mx-auto max-w-[1120px] space-y-8 px-5 py-7"><AppNav /><CatalogUnavailable title="Book detail could not be loaded" message={getApiErrorMessage(error)} /><Footer /></main>; }
   if (!book) notFound();
   let related: Book[] = [];
   let relatedError = false;

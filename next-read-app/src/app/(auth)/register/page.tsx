@@ -45,8 +45,8 @@ export default function RegisterPage() {
         password: values.password,
       });
       toast({
-        title: "Akun berhasil dibuat",
-        description: "Anda sudah masuk ke NexRead.",
+        title: "Account created",
+        description: "You are now signed in to NexRead.",
       });
       router.push("/");
       router.refresh();
@@ -58,7 +58,7 @@ export default function RegisterPage() {
         message,
       });
       toast({
-        title: "Gagal membuat akun",
+        title: "Account creation failed",
         description: message,
         variant: "error",
       });
@@ -67,8 +67,8 @@ export default function RegisterPage() {
 
   const onInvalid = () => {
     toast({
-      title: "Form belum lengkap",
-      description: "Periksa kembali seluruh data registrasi Anda.",
+      title: "Form incomplete",
+      description: "Please check all your registration details again.",
       variant: "error",
     });
   };

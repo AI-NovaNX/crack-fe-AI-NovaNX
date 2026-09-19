@@ -58,7 +58,7 @@ async function fetchWithNetworkRetry(url: string, init: RequestInit) {
       if (isLastAttempt || init.signal?.aborted) {
         throw new ApiError(
           503,
-          "Layanan NexRead sedang sulit dijangkau. Coba kembali sebentar lagi.",
+          "NexRead's service is having trouble responding. Please try again shortly.",
         );
       }
 
@@ -66,7 +66,7 @@ async function fetchWithNetworkRetry(url: string, init: RequestInit) {
     }
   }
 
-  throw new ApiError(503, "Layanan NexRead sedang sulit dijangkau.");
+  throw new ApiError(503, "NexRead's service is having trouble responding.");
 }
 
 export async function apiRequest<T>(

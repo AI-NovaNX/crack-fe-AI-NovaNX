@@ -44,7 +44,7 @@ export default async function AuthorsPage({ searchParams }: AuthorsPageProps) {
         <AppNav />
         <div className="pt-10">
           <CatalogUnavailable
-            title="Author list belum dapat dimuat"
+            title="Author list could not be loaded"
             message={getApiErrorMessage(error)}
           />
         </div>

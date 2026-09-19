@@ -43,12 +43,12 @@ const PAGE_SIZE = 8;
 
 function normalizeBooksResponse(body: unknown): BooksResponse {
   if (!body || typeof body !== "object") {
-    throw new Error("Respons daftar buku tidak valid.");
+    throw new Error("Invalid book list response.");
   }
 
   const response = body as Partial<BooksResponse>;
   if (!Array.isArray(response.data) || !response.meta) {
-    throw new Error("Respons daftar buku tidak lengkap.");
+    throw new Error("Incomplete book list response.");
   }
 
   const data = response.data.filter((book): book is AdminBook =>
@@ -118,7 +118,7 @@ export function AdminBookList() {
           throw new Error(
             body && "message" in body && body.message
               ? body.message
-              : "Book list belum dapat dimuat.",
+              : "Book list could not be loaded.",
           );
         const result = normalizeBooksResponse(body);
         setBooks(Array.isArray(result.data) ? result.data : []);
@@ -129,7 +129,7 @@ export function AdminBookList() {
         setError(
           loadError instanceof Error
             ? loadError.message
-            : "Book list belum dapat dimuat.",
+            : "Book list could not be loaded.",
         );
       } finally {
         if (!controller.signal.aborted) setLoading(false);
@@ -150,7 +150,7 @@ export function AdminBookList() {
       });
       const body = await response.json().catch(() => null);
       if (!response.ok)
-        throw new Error(body?.message || "Book belum dapat dihapus.");
+        throw new Error(body?.message || "The book could not be deleted.");
       setBookToDelete(null);
       if (books.length === 1 && page > 1) setPage((value) => value - 1);
       else setAttempt((value) => value + 1);
@@ -158,7 +158,7 @@ export function AdminBookList() {
       setError(
         deleteError instanceof Error
           ? deleteError.message
-          : "Book belum dapat dihapus.",
+          : "The book could not be deleted.",
       );
       setBookToDelete(null);
     } finally {
@@ -249,7 +249,7 @@ export function AdminBookList() {
           </div>
         ) : books.length === 0 ? (
           <div className="rounded-[24px] border border-palette-indigo-300-20 bg-gray-200 px-6 py-14 text-center text-sm text-palette-slate-400">
-            Tidak ada buku yang cocok.
+            No matching books.
           </div>
         ) : (
           books.map((book) => (

@@ -75,7 +75,7 @@ export default function FavoriteAuthorPage() {
         <AppNav />
         <section className="flex-1 py-9">
           <CatalogUnavailable
-            title="Daftar author favorit belum dapat dimuat"
+            title="Favorite author list could not be loaded"
             message={error}
             onRetry={retry}
           />
@@ -92,7 +92,7 @@ export default function FavoriteAuthorPage() {
         <section className="flex-1 py-9">
           <div className="my-10 rounded-3xl border border-border bg-secondary p-10 text-center">
             <h2 className="text-xl font-bold">
-              Login untuk melihat author favorit Anda
+              Login to view your favorite authors
             </h2>
             <Link
               href="/login"
@@ -114,14 +114,14 @@ export default function FavoriteAuthorPage() {
       <section className="flex-1 py-9">
         <h1 className="text-3xl font-extrabold sm:text-4xl">Favorite Author</h1>
         <p className="mt-3 text-sm text-palette-slate-400">
-          Daftar penulis yang Anda tandai sebagai favorit.
+          The list of authors you have marked as favorites.
         </p>
 
         {!authors.length ? (
           <div className="my-8 rounded-3xl border border-border bg-secondary p-12 text-center">
-            <h2 className="text-xl font-bold">Belum ada author favorit</h2>
+            <h2 className="text-xl font-bold">No favorite authors yet</h2>
             <p className="mt-3 text-palette-slate-400">
-              Klik ikon hati pada penulis untuk menyimpannya di sini.
+              Click the heart icon on an author to save them here.
             </p>
             <Link
               href="/"

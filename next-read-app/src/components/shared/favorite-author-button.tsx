@@ -18,7 +18,7 @@ export function FavoriteAuthorButton({
   const router = useRouter();
   const toast = useToast();
   const saved = authors.some((item) => item.id === author.id);
-  const label = saved ? "Hapus dari favorit" : "Tambahkan ke favorit";
+  const label = saved ? "Remove from favorites" : "Add to favorites";
 
   return (
     <button
@@ -40,18 +40,18 @@ export function FavoriteAuthorButton({
           toggleAuthor(author);
           toast({
             title: saved
-              ? "Penulis dihapus dari favorit"
-              : "Penulis ditambahkan ke favorit",
+              ? "Author removed from favorites"
+              : "Author added to favorites",
             description: author.name,
             variant: "success",
           });
         } catch (error) {
           toast({
-            title: "Favorit penulis belum dapat diperbarui",
+            title: "Favorite author could not be updated",
             description:
               error instanceof Error
                 ? error.message
-                : "Penyimpanan browser tidak tersedia.",
+                : "Browser storage is unavailable.",
             variant: "error",
           });
         }

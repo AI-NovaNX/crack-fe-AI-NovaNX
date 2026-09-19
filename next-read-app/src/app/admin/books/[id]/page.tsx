@@ -21,7 +21,7 @@ export default async function AdminBookDetailPage({
     return (
       <main className="mx-auto w-full max-w-[1120px] px-5 pb-8 sm:px-8">
         <CatalogUnavailable
-          title="Detail buku belum dapat dimuat"
+          title="Book detail could not be loaded"
           message={getApiErrorMessage(error)}
         />
       </main>

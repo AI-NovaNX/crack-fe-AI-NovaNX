@@ -154,7 +154,7 @@ export function AdminLoanList({ initialFilter }: { initialFilter?: string }) {
           throw new Error(
             body && "message" in body && body.message
               ? body.message
-              : "Borrowed list belum dapat dimuat.",
+              : "Borrowed list could not be loaded.",
           );
         }
         const result = body as LoansResponse;
@@ -166,7 +166,7 @@ export function AdminLoanList({ initialFilter }: { initialFilter?: string }) {
         setError(
           loadError instanceof Error
             ? loadError.message
-            : "Borrowed list belum dapat dimuat.",
+            : "Borrowed list could not be loaded.",
         );
       } finally {
         if (!controller.signal.aborted) setLoading(false);
@@ -255,7 +255,7 @@ export function AdminLoanList({ initialFilter }: { initialFilter?: string }) {
           </div>
         ) : loans.length === 0 ? (
           <div className="rounded-[24px] border border-palette-indigo-300-20 bg-gray-200 px-6 py-14 text-center text-sm text-palette-slate-400">
-            Tidak ada pinjaman yang cocok.
+            No matching loans.
           </div>
         ) : (
           loans.map((loan) => {

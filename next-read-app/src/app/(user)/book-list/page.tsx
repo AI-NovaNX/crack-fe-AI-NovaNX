@@ -231,8 +231,8 @@ async function BookFilterCard({
           <FilterGroup title="Category" items={categories} />
           {categoriesUnavailable ? (
             <InlineErrorNotice
-              title="Kategori belum dapat dimuat"
-              message="Daftar kategori sedang tidak tersedia."
+              title="Categories could not be loaded"
+              message="The category list is currently unavailable."
               className="pt-4 text-xs leading-5 text-amber-300"
             />
           ) : null}
@@ -373,7 +373,7 @@ export default async function BookListPage({
           <section className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {booksUnavailable ? (
               <CatalogUnavailable
-                title="Daftar buku belum dapat dimuat"
+                title="Book list could not be loaded"
                 message={booksErrorMessage}
                 className="sm:col-span-2 lg:col-span-3 xl:col-span-5"
               />

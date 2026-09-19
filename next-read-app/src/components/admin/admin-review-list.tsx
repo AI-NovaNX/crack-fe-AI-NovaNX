@@ -64,7 +64,7 @@ export function AdminReviewList() {
           throw new Error(
             body && "message" in body
               ? body.message
-              : "Reviews belum dapat dimuat.",
+              : "Reviews could not be loaded.",
           );
         const result = body as Response;
         setReviews(result.data ?? []);
@@ -77,7 +77,7 @@ export function AdminReviewList() {
           setError(
             loadError instanceof Error
               ? loadError.message
-              : "Reviews belum dapat dimuat.",
+              : "Reviews could not be loaded.",
           );
       } finally {
         if (!controller.signal.aborted) setLoading(false);
@@ -97,18 +97,18 @@ export function AdminReviewList() {
       });
       const body = await response.json().catch(() => null);
       if (!response.ok)
-        throw new Error(body?.message || "Review belum dapat dihapus.");
+        throw new Error(body?.message || "The review could not be deleted.");
       setReviews((current) =>
         current.filter((review) => review.id !== pending.id),
       );
       setPending(null);
-      toast({ title: "Review berhasil dihapus", variant: "success" });
+      toast({ title: "Review deleted successfully", variant: "success" });
     } catch (deleteError) {
       setPending(null);
       setError(
         deleteError instanceof Error
           ? deleteError.message
-          : "Review belum dapat dihapus.",
+          : "The review could not be deleted.",
       );
     }
   }
@@ -200,7 +200,7 @@ export function AdminReviewList() {
                   colSpan={5}
                   className="px-5 py-10 text-center text-palette-slate-400"
                 >
-                  Belum ada review.
+                  No reviews yet.
                 </td>
               </tr>
             )}

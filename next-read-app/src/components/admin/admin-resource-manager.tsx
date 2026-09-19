@@ -42,7 +42,7 @@ const PAGE_SIZE = 10;
 function messageOf(error: unknown) {
   return error instanceof Error
     ? error.message
-    : "Permintaan belum dapat diproses.";
+    : "The request could not be processed.";
 }
 
 export function AdminResourceManager({
@@ -88,7 +88,7 @@ export function AdminResourceManager({
           throw new Error(
             body && "message" in body
               ? body.message
-              : `Daftar ${resource.toLowerCase()} belum dapat dimuat.`,
+              : `The ${resource.toLowerCase()} list could not be loaded.`,
           );
         const result = body as ResourceResponse;
         const data = Array.isArray(result) ? result : (result?.data ?? []);
@@ -112,11 +112,12 @@ export function AdminResourceManager({
     event.preventDefault();
     const form = new FormData(event.currentTarget);
     const name = String(form.get("name") ?? "").trim();
-    if (!name) return setError("Nama wajib diisi.");
+    if (!name) return setError("Name is required.");
+    const isEditing = Boolean(editing?.id);
     setSubmitting(true);
     try {
       const payload = {
-        ...(editing ? { id: editing.id } : {}),
+        ...(isEditing ? { id: editing!.id } : {}),
         name,
         ...(categoryFields
           ? {
@@ -126,15 +127,15 @@ export function AdminResourceManager({
           : {}),
       };
       const response = await fetch(endpoint, {
-        method: editing ? "PATCH" : "POST",
+        method: isEditing ? "PATCH" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
       const body = await response.json().catch(() => null);
       if (!response.ok)
-        throw new Error(body?.message || "Data belum dapat disimpan.");
+        throw new Error(body?.message || "The data could not be saved.");
       toast({
-        title: `${resource.slice(0, -1)} berhasil ${editing ? "diperbarui" : "ditambahkan"}`,
+        title: `${resource.slice(0, -1)} ${isEditing ? "updated" : "added"} successfully`,
         variant: "success",
       });
       setEditing(null);
@@ -157,9 +158,9 @@ export function AdminResourceManager({
       });
       const body = await response.json().catch(() => null);
       if (!response.ok)
-        throw new Error(body?.message || "Data belum dapat dihapus.");
+        throw new Error(body?.message || "The data could not be deleted.");
       toast({
-        title: `${resource.slice(0, -1)} berhasil dihapus`,
+        title: `${resource.slice(0, -1)} deleted successfully`,
         variant: "success",
       });
       setDeleting(null);
@@ -278,7 +279,7 @@ export function AdminResourceManager({
                   colSpan={categoryFields ? 4 : 2}
                   className="px-5 py-10 text-center text-palette-slate-400"
                 >
-                  Belum ada data.
+                  No data yet.
                 </td>
               </tr>
             )}
@@ -315,9 +316,13 @@ export function AdminResourceManager({
             {editing?.id ? `Edit ${singular}` : `Add ${singular}`}
           </DialogTitle>
           <DialogDescription className="mt-1 text-palette-slate-400">
-            Simpan perubahan untuk memperbarui katalog.
+            Save your changes to update the catalog.
           </DialogDescription>
-          <form onSubmit={submit} className="mt-5 space-y-4">
+          <form
+            key={editing?.id ?? "new"}
+            onSubmit={submit}
+            className="mt-5 space-y-4"
+          >
             <label className="block text-sm font-semibold">
               Name
               <Input

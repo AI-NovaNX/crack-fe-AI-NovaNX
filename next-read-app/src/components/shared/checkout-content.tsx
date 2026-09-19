@@ -63,7 +63,7 @@ export function CheckoutContent() {
           return;
         }
         if (!response.ok)
-          throw new Error(body.message || "Checkout belum dapat dimuat.");
+          throw new Error(body.message || "Checkout could not be loaded.");
         if (body.user?.role && body.user.role.toLowerCase() === "admin") {
           setStatus("admin");
           return;
@@ -74,7 +74,7 @@ export function CheckoutContent() {
       } catch (error) {
         if (controller.signal.aborted) return;
         setError(
-          error instanceof Error ? error.message : "Periksa koneksi Anda.",
+          error instanceof Error ? error.message : "Check your connection.",
         );
         setStatus("error");
       }
@@ -105,7 +105,7 @@ export function CheckoutContent() {
       const body = await response.json();
       if (!response.ok)
         throw new Error(
-          body.message || "Peminjaman belum berhasil. Silakan coba kembali.",
+          body.message || "The loan was not completed. Please try again.",
         );
       setStatus("success");
       if (!directBookId)
@@ -114,7 +114,7 @@ export function CheckoutContent() {
       setError(
         error instanceof Error
           ? error.message
-          : "Periksa koneksi Anda lalu coba kembali.",
+          : "Check your connection and try again.",
       );
     } finally {
       pending.current = false;
@@ -125,13 +125,13 @@ export function CheckoutContent() {
   if (status === "loading")
     return (
       <div role="status" className={`${panel} min-h-64 animate-pulse`}>
-        Memuat checkout…
+        Loading checkout…
       </div>
     );
   if (status === "error")
     return (
       <CatalogUnavailable
-        title="Checkout belum dapat dimuat"
+        title="Checkout could not be loaded"
         message={error}
         onRetry={() => {
           setStatus("loading");
@@ -142,7 +142,7 @@ export function CheckoutContent() {
   if (status === "login")
     return (
       <section className={`${panel} text-center`}>
-        <h2 className="text-xl font-bold">Login untuk melanjutkan checkout</h2>
+        <h2 className="text-xl font-bold">Login to continue checkout</h2>
         <Link href="/login" className={`${action} mt-6`}>
           Login
         </Link>
@@ -151,10 +151,10 @@ export function CheckoutContent() {
   if (status === "admin")
     return (
       <section className={`${panel} text-center`}>
-        <h2 className="text-xl font-bold">Peminjaman tidak tersedia</h2>
+        <h2 className="text-xl font-bold">Loan not available</h2>
         <p className="mt-3 text-palette-slate-400">{adminBorrowMessage}</p>
         <Link href="/admin/dashboard" className={`${action} mt-6`}>
-          Kembali ke Admin
+          Back to Admin
         </Link>
       </section>
     );
@@ -165,12 +165,12 @@ export function CheckoutContent() {
           className="mx-auto mb-4 size-12 text-skyblue"
           aria-hidden="true"
         />
-        <h2 className="text-2xl font-extrabold">Peminjaman berhasil!</h2>
+        <h2 className="text-2xl font-extrabold">Loan successful!</h2>
         <p className="mt-3 text-palette-slate-400">
-          {data?.items.length} buku berhasil dipinjam selama {duration} hari.
+          {data?.items.length} book(s) borrowed successfully for {duration} days.
         </p>
-        <Link href="/book-list" className={`${action} mt-6`}>
-          Browse Books
+        <Link href="/borrowed" className={`${action} mt-6`}>
+          Borrowed List
         </Link>
       </section>
     );
@@ -181,9 +181,9 @@ export function CheckoutContent() {
           className="mx-auto mb-4 size-10 text-skyblue"
           aria-hidden="true"
         />
-        <h2 className="text-xl font-bold">Belum ada buku untuk dipinjam</h2>
+        <h2 className="text-xl font-bold">No books to borrow yet</h2>
         <p className="mt-3 text-palette-slate-400">
-          Tambahkan buku ke keranjang untuk melanjutkan checkout.
+          Add a book to your cart to continue checkout.
         </p>
         <Link href="/book-list" className={`${action} mt-6`}>
           Browse Books
@@ -203,7 +203,7 @@ export function CheckoutContent() {
           {[
             ["Name", data.user.fullName],
             ["Email", data.user.email],
-            ["Nomor Handphone", data.user.phone || "Belum ditambahkan"],
+            ["Phone Number", data.user.phone || "Not added yet"],
           ].map(([label, value]) => (
             <div
               key={label}

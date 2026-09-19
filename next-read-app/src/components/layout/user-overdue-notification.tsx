@@ -82,7 +82,7 @@ export function UserOverdueNotification() {
           signal: controller.signal,
         });
         if (!response.ok) {
-          throw new Error("Notifikasi overdue belum dapat dimuat.");
+          throw new Error("Overdue notifications could not be loaded.");
         }
         setOverdueLoans(
           getOverdueLoans(await response.json().catch(() => null)),
@@ -90,7 +90,7 @@ export function UserOverdueNotification() {
       } catch {
         if (!controller.signal.aborted) {
           setOverdueLoans([]);
-          setNotificationError("Notifikasi belum dapat dimuat.");
+          setNotificationError("Notifications could not be loaded.");
         }
       }
     }

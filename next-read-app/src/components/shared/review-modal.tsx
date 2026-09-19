@@ -36,7 +36,7 @@ export function ReviewModal({
   async function submitReview(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!rating) {
-      toast({ title: "Pilih rating terlebih dahulu", variant: "info" });
+      toast({ title: "Please choose a rating first", variant: "info" });
       return;
     }
     setSubmitting(true);
@@ -48,18 +48,18 @@ export function ReviewModal({
       });
       const body = await response.json().catch(() => null);
       if (!response.ok)
-        throw new Error(body?.message || "Review belum dapat dikirim.");
+        throw new Error(body?.message || "The review could not be submitted.");
       toast({
-        title: "Review berhasil dikirim",
+        title: "Review submitted successfully",
         description: book.title,
         variant: "success",
       });
       onSubmitted();
     } catch (error) {
       toast({
-        title: "Gagal mengirim review",
+        title: "Failed to submit review",
         description:
-          error instanceof Error ? error.message : "Silakan coba kembali.",
+          error instanceof Error ? error.message : "Please try again.",
         variant: "error",
       });
     } finally {
@@ -84,11 +84,11 @@ export function ReviewModal({
             Give Review
           </DialogTitle>
           <DialogDescription className="sr-only">
-            Berikan rating dan ulasan untuk {book.title}.
+            Give a rating and review for {book.title}.
           </DialogDescription>
           <DialogClose
             disabled={submitting}
-            aria-label="Tutup modal review"
+            aria-label="Close review modal"
             className="rounded-full border border-transparent bg-secondary p-1.5 text-palette-slate-400 transition-colors hover:border-palette-cyan-300 hover:bg-accent hover:text-palette-cyan-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-palette-cyan-300 disabled:opacity-50"
           >
             <X className="size-5" aria-hidden="true" />
@@ -100,14 +100,14 @@ export function ReviewModal({
               <legend className="w-full text-center text-xs font-extrabold text-palette-slate-400">
                 Give Rating
               </legend>
-              <div className="mt-2 flex justify-center gap-2" role="radiogroup" aria-label="Rating buku">
+              <div className="mt-2 flex justify-center gap-2" role="radiogroup" aria-label="Book rating">
                 {[1, 2, 3, 4, 5].map((value) => (
                   <button
                     key={value}
                     type="button"
                     role="radio"
                     aria-checked={rating === value}
-                    aria-label={`${value} bintang`}
+                    aria-label={`${value} stars`}
                     onClick={() => setRating(value)}
                     className="rounded-lg p-1 text-palette-slate-400 transition-all hover:scale-110 hover:text-yellow-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-palette-cyan-300"
                   >
@@ -123,7 +123,7 @@ export function ReviewModal({
                 ))}
               </div>
               <label htmlFor="review-comment" className="sr-only">
-                Review untuk {book.title}
+                Review for {book.title}
               </label>
               <textarea
                 id="review-comment"

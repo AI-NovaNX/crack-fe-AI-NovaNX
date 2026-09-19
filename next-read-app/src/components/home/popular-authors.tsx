@@ -79,7 +79,7 @@ export async function PopularAuthors() {
     return (
       <section className="w-full pb-10">
         <CatalogUnavailable
-          title="Penulis populer belum dapat dimuat"
+          title="Popular authors could not be loaded"
           message={getApiErrorMessage(error)}
         />
       </section>

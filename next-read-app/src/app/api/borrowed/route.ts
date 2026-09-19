@@ -13,7 +13,7 @@ const json = (body: unknown, status = 200) =>
 export async function GET() {
   const token = (await cookies()).get("nexread_access")?.value;
   if (!token)
-    return json({ message: "Silakan login untuk melihat pinjaman." }, 401);
+    return json({ message: "Please sign in to view your loans." }, 401);
 
   try {
     const loans = await apiRequest<unknown[]>("/loans", {

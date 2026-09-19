@@ -90,7 +90,7 @@ export async function RecommendedForYou({ page = 1 }: { page?: number }) {
     return (
       <section className="w-full py-10">
         <CatalogUnavailable
-          title="Rekomendasi buku belum dapat dimuat"
+          title="Book recommendations could not be loaded"
           message={getApiErrorMessage(error)}
           className="min-h-[260px]"
         />

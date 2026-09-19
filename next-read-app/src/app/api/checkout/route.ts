@@ -22,7 +22,7 @@ function failure(error: unknown) {
 export async function GET(request: NextRequest) {
   const token = (await cookies()).get("nexread_access")?.value;
   if (!token)
-    return json({ message: "Silakan login untuk melanjutkan checkout." }, 401);
+    return json({ message: "Please sign in to continue checkout." }, 401);
   try {
     const bookId = request.nextUrl.searchParams.get("bookId")?.trim();
     if (bookId) {
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
     return json({ message: "Invalid origin" }, 403);
   const token = (await cookies()).get("nexread_access")?.value;
   if (!token)
-    return json({ message: "Silakan login kembali untuk meminjam buku." }, 401);
+    return json({ message: "Please sign in again to borrow this book." }, 401);
   const body = await request.json().catch(() => null);
   const itemIds = body?.itemIds;
   const bookId = typeof body?.bookId === "string" ? body.bookId.trim() : "";
@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
         )))
   )
     return json(
-      { message: "Pilih durasi dan setujui ketentuan peminjaman." },
+      { message: "Please choose a duration and agree to the loan terms." },
       400,
     );
   try {

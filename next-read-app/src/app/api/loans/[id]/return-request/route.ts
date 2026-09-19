@@ -19,12 +19,12 @@ export async function POST(
 
   const token = (await cookies()).get("nexread_access")?.value;
   if (!token)
-    return json({ message: "Silakan login untuk melanjutkan." }, 401);
+    return json({ message: "Please sign in to continue." }, 401);
 
   const { id } = await params;
   const loanId = Number(id);
   if (!Number.isSafeInteger(loanId) || loanId <= 0)
-    return json({ message: "ID pinjaman tidak valid." }, 400);
+    return json({ message: "Invalid loan ID." }, 400);
 
   try {
     await apiRequest(`/loans/${loanId}/return`, {

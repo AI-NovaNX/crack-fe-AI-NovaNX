@@ -28,7 +28,7 @@ export default async function AdminAddBookPage() {
     return (
       <main className="mx-auto w-full max-w-[760px] px-5 py-8 sm:px-8">
         <CatalogUnavailable
-          title="Form Add Book belum dapat dimuat"
+          title="Add Book form could not be loaded"
           message={getApiErrorMessage(loadError)}
         />
       </main>

@@ -7,32 +7,32 @@ export function getHttpErrorMessage(status: number, detail?: string) {
   switch (status) {
     case 400:
       return (
-        detail || "Data yang dikirim belum valid. Periksa kembali isian Anda."
+        detail || "The submitted data is invalid. Please check your input again."
       );
     case 401:
-      return detail || "Sesi Anda telah berakhir. Silakan masuk kembali.";
+      return detail || "Your session has expired. Please sign in again.";
     case 403:
-      return "Anda tidak memiliki izin untuk melakukan tindakan ini.";
+      return "You do not have permission to perform this action.";
     case 404:
-      return detail || "Data yang Anda cari tidak ditemukan.";
+      return detail || "The data you are looking for was not found.";
     case 409:
-      return detail || "Data tersebut sudah digunakan atau mengalami konflik.";
+      return detail || "That data is already in use or has a conflict.";
     case 429:
-      return "Terlalu banyak permintaan. Tunggu sebentar lalu coba kembali.";
+      return "Too many requests. Please wait a moment and try again.";
     case 502:
     case 503:
     case 504:
-      return "Layanan NexRead sedang sulit dijangkau. Coba kembali sebentar lagi.";
+      return "NexRead's service is having trouble responding. Please try again shortly.";
     default:
       return status >= 500
-        ? "Terjadi gangguan pada server. Coba kembali sebentar lagi."
-        : detail || "Permintaan belum dapat diproses. Silakan coba kembali.";
+        ? "A server error occurred. Please try again shortly."
+        : detail || "The request could not be processed. Please try again.";
   }
 }
 
 export function getApiErrorMessage(
   error: unknown,
-  fallback = "Data belum dapat dimuat. Silakan coba kembali.",
+  fallback = "The data could not be loaded. Please try again.",
 ) {
   if (error && typeof error === "object") {
     const { status, message } = error as StatusError;

@@ -20,7 +20,7 @@ export async function submitAuth(
     });
   } catch {
     throw new Error(
-      "Tidak dapat terhubung ke NexRead. Periksa koneksi Anda lalu coba kembali.",
+      "Unable to connect to NexRead. Check your connection and try again.",
     );
   }
   const body = await response.json();

@@ -330,7 +330,7 @@ export function BorrowedList({
           return;
         }
         if (!response.ok)
-          throw new Error(body.message || "Borrowed list belum dapat dimuat.");
+          throw new Error(body.message || "Borrowed list could not be loaded.");
         const values: unknown[] = Array.isArray(body)
           ? body
           : Array.isArray(body.data)
@@ -349,7 +349,7 @@ export function BorrowedList({
         setError(
           loadError instanceof Error
             ? loadError.message
-            : "Periksa koneksi Anda.",
+            : "Check your connection.",
         );
         setStatus("error");
       }
@@ -386,7 +386,7 @@ export function BorrowedList({
         });
         const body = await response.json();
         if (!response.ok)
-          throw new Error(body?.message || "Review belum dapat dimuat.");
+          throw new Error(body?.message || "Reviews could not be loaded.");
 
         const values: unknown[] = Array.isArray(body)
           ? body
@@ -440,7 +440,7 @@ export function BorrowedList({
         setReviewsError(
           loadError instanceof Error
             ? loadError.message
-            : "Review belum dapat dimuat.",
+            : "Reviews could not be loaded.",
         );
         setReviewEntries([]);
       } finally {
@@ -478,7 +478,7 @@ export function BorrowedList({
     if (status === "error")
       return (
         <CatalogUnavailable
-          title="Borrowed list belum dapat dimuat"
+          title="Borrowed list could not be loaded"
           message={error}
         />
       );
@@ -486,7 +486,7 @@ export function BorrowedList({
       return (
         <section className="rounded-[24px] border border-border bg-secondary p-10 text-center">
           <h1 className="text-xl font-extrabold">
-            Login untuk melihat borrowed list
+            Login to view your borrowed list
           </h1>
           <Link
             href="/login"
@@ -633,7 +633,7 @@ export function BorrowedList({
           <section className="mt-6 space-y-4">
             {reviewsLoading ? (
               <div className="rounded-[22px] border border-border bg-secondary px-5 py-8 text-center text-sm text-palette-slate-400">
-                Memuat review...
+                Loading reviews...
               </div>
             ) : reviewsError ? (
               <div className="rounded-[22px] border border-border bg-secondary px-5 py-8 text-center text-sm text-palette-slate-400">
@@ -645,7 +645,7 @@ export function BorrowedList({
               ))
             ) : (
               <div className="rounded-[22px] border border-border bg-secondary px-5 py-8 text-center text-sm text-palette-slate-400">
-                Tidak ada review yang cocok dengan pencarian Anda.
+                No reviews match your search.
               </div>
             )}
           </section>

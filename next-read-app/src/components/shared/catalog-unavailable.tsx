@@ -17,7 +17,7 @@ type CatalogUnavailableProps = {
 
 export function CatalogUnavailable({
   title,
-  message = "Kami belum dapat memperbarui data. Periksa koneksi Anda atau coba kembali sebentar lagi.",
+  message = "We couldn't refresh the data. Check your connection or try again shortly.",
   className = "",
   onRetry,
 }: CatalogUnavailableProps) {
@@ -57,7 +57,7 @@ export function CatalogUnavailable({
             className={`size-4 ${isPending ? "animate-spin" : ""}`}
             aria-hidden="true"
           />
-          {isPending ? "Mencoba kembali..." : "Coba lagi"}
+          {isPending ? "Retrying..." : "Try again"}
         </Button>
       </CardContent>
     </Card>

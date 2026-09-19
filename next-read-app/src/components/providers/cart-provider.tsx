@@ -47,7 +47,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
     if (!response.ok) {
       setStatus("error");
-      throw new Error(data.message || "Keranjang belum dapat dimuat.");
+      throw new Error(data.message || "The cart could not be loaded.");
     }
     setItems(data);
     setStatus("ready");
@@ -110,7 +110,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
             }
           }
         }
-        throw new Error(data.message || "Buku belum dapat ditambahkan.");
+        throw new Error(data.message || "The book could not be added.");
       }
       // Mark membership immediately; the shared refresh supplies real cart item IDs.
       request.current++;

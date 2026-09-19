@@ -9,7 +9,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export function RouteErrorState({
-  title = "Halaman belum dapat dimuat",
+  title = "The page could not be loaded",
   reset,
 }: {
   title?: string;
@@ -20,7 +20,7 @@ export function RouteErrorState({
   useEffect(() => {
     toast({
       title,
-      description: "Koneksi ke layanan sedang terganggu. Silakan coba kembali.",
+      description: "The connection to the service is disrupted. Please try again.",
       variant: "error",
     });
   }, [title, toast]);
@@ -34,13 +34,13 @@ export function RouteErrorState({
         />
         <h1 className="pt-5 text-2xl font-extrabold">{title}</h1>
         <p className="pt-3 leading-7 text-palette-slate-400">
-          Koneksi ke layanan sedang terganggu atau permintaan belum dapat
-          diproses. Anda dapat mencoba lagi tanpa kehilangan halaman ini.
+          The connection to the service is disrupted or the request could not
+          be processed. You can try again without losing this page.
         </p>
         <div className="flex justify-center gap-3 pt-6">
           <Button type="button" onClick={reset} className="gap-2 rounded-full">
             <RefreshCw className="size-4" aria-hidden="true" />
-            Coba lagi
+            Try again
           </Button>
           <Link
             href="/"
@@ -49,7 +49,7 @@ export function RouteErrorState({
               "rounded-full",
             )}
           >
-            Kembali ke beranda
+            Back to home
           </Link>
         </div>
       </div>

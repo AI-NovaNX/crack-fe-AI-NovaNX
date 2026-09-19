@@ -64,13 +64,13 @@ export const UserNav = ({
     setLoggingOut(true);
     try {
       await submitAuth("logout");
-      toast({ title: "Berhasil keluar" });
+      toast({ title: "Signed out" });
       router.push("/");
       router.refresh();
     } catch {
       toast({
-        title: "Gagal keluar",
-        description: "Periksa koneksi Anda lalu coba kembali.",
+        title: "Sign out failed",
+        description: "Check your connection and try again.",
         variant: "error",
       });
     } finally {
@@ -185,22 +185,22 @@ export const UserNav = ({
         >
           <AlertDialogContent>
             <AlertDialogTitle className="text-xl font-extrabold">
-              Keluar dari NexRead?
+              Sign out of NexRead?
             </AlertDialogTitle>
             <AlertDialogDescription className="pt-2 text-sm leading-6 text-palette-slate-400">
-              Sesi Anda akan diakhiri pada perangkat ini.
+              Your session will end on this device.
             </AlertDialogDescription>
             <div className="flex justify-end gap-3 pt-6">
               <AlertDialogCancel
                 className={buttonVariants({ variant: "outline" })}
               >
-                Batal
+                Cancel
               </AlertDialogCancel>
               <AlertDialogAction
                 onClick={() => void logout()}
                 className={buttonVariants({ variant: "destructive" })}
               >
-                Ya, keluar
+                Yes, sign out
               </AlertDialogAction>
             </div>
           </AlertDialogContent>

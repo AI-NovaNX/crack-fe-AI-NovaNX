@@ -48,7 +48,7 @@ export async function BookCategory() {
     return (
       <section className="w-full pt-6" aria-label="Book categories">
         <CatalogUnavailable
-          title="Kategori belum dapat dimuat"
+          title="Categories could not be loaded"
           message={errorMessage}
         />
       </section>

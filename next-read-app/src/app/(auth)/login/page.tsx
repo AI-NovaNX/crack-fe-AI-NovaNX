@@ -38,8 +38,8 @@ export default function LoginPage() {
     try {
       const { user } = await submitAuth("login", values);
       toast({
-        title: "Berhasil masuk",
-        description: "Selamat datang kembali.",
+        title: "Signed in",
+        description: "Welcome back.",
       });
       router.push(isAdminRole(user?.role) ? "/admin/dashboard" : "/");
       router.refresh();
@@ -50,14 +50,14 @@ export default function LoginPage() {
         type: "server",
         message,
       });
-      toast({ title: "Gagal masuk", description: message, variant: "error" });
+      toast({ title: "Sign in failed", description: message, variant: "error" });
     }
   };
 
   const onInvalid = () => {
     toast({
-      title: "Form belum lengkap",
-      description: "Periksa kembali email dan password Anda.",
+      title: "Form incomplete",
+      description: "Please check your email and password again.",
       variant: "error",
     });
   };

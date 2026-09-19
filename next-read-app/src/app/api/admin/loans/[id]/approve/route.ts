@@ -20,7 +20,7 @@ export async function PATCH(
   const { id } = await params;
   const loanId = Number(id);
   if (!Number.isSafeInteger(loanId) || loanId <= 0)
-    return json({ message: "ID pinjaman tidak valid." }, 400);
+    return json({ message: "Invalid loan ID." }, 400);
 
   try {
     await apiRequest(`/loans/${loanId}/return`, {

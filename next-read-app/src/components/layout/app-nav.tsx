@@ -29,7 +29,7 @@ export function AppNav() {
           else if (response.status === 401) setUser(null);
           else {
             toast({
-              title: "Status akun belum dapat diperiksa",
+              title: "Account status could not be verified",
               description: body.message,
               variant: "error",
             });
@@ -38,9 +38,9 @@ export function AppNav() {
       } catch {
         if (!signal.aborted) {
           toast({
-            title: "Koneksi terputus",
+            title: "Connection lost",
             description:
-              "Status akun akan diperiksa kembali saat halaman dimuat ulang.",
+              "Account status will be checked again when the page reloads.",
             variant: "error",
           });
         }

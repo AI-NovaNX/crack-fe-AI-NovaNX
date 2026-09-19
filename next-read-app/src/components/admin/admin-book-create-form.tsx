@@ -1,20 +1,16 @@
 "use client";
 
-import {
-  CloudUpload,
-  Link2,
-  Trash2,
-} from "lucide-react";
+import { CloudUpload, Link2, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import {
   useEffect,
   useRef,
   useState,
-  useCallback,
   type FormEvent,
   type DragEvent,
 } from "react";
 
+import { AuthorInputField } from "@/components/admin/author-input-field";
 import { useToast } from "@/components/providers/app-feedback-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,150 +37,6 @@ function createBookId(title: string) {
     .trim()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
-}
-
-/** Autocomplete input yang memungkinkan user mengetik nama author */
-function AuthorInputField({
-  authors,
-  value,
-  authorName,
-  onChange,
-  onNameChange,
-  error,
-  disabled,
-}: {
-  authors: Option[];
-  value: string;
-  authorName: string;
-  onChange: (id: string) => void;
-  onNameChange: (name: string) => void;
-  error?: string;
-  disabled?: boolean;
-}) {
-  const [open, setOpen] = useState(false);
-  const [highlighted, setHighlighted] = useState(0);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  const suggestions = authorName.trim()
-    ? authors.filter((a) =>
-        a.name.toLowerCase().includes(authorName.trim().toLowerCase()),
-      )
-    : authors.slice(0, 8);
-
-  const select = useCallback(
-    (author: Option) => {
-      onNameChange(author.name);
-      onChange(author.id);
-      setOpen(false);
-    },
-    [onChange, onNameChange],
-  );
-
-  useEffect(() => {
-    function handler(e: MouseEvent) {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(e.target as Node)
-      ) {
-        setOpen(false);
-        const matched = authors.find(
-          (a) => a.name.toLowerCase() === authorName.trim().toLowerCase(),
-        );
-        if (matched) {
-          onChange(matched.id);
-          onNameChange(matched.name);
-        } else if (!value && authors.length > 0) {
-          const partialMatch = authors.find((a) =>
-            a.name.toLowerCase().includes(authorName.trim().toLowerCase()),
-          );
-          if (partialMatch && authorName.trim()) {
-            onChange(partialMatch.id);
-          }
-        }
-      }
-    }
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [authors, authorName, value, onChange, onNameChange]);
-
-  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (!open) {
-      if (e.key === "ArrowDown" || e.key === "Enter") setOpen(true);
-      return;
-    }
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      setHighlighted((h) => Math.min(h + 1, suggestions.length - 1));
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      setHighlighted((h) => Math.max(h - 1, 0));
-    } else if (e.key === "Enter") {
-      e.preventDefault();
-      if (suggestions[highlighted]) select(suggestions[highlighted]);
-    } else if (e.key === "Escape") {
-      setOpen(false);
-    }
-  }
-
-  return (
-    <div ref={containerRef} className="relative mt-2">
-      <Input
-        id="book-author"
-        type="text"
-        autoComplete="off"
-        placeholder="Type author name..."
-        disabled={disabled}
-        value={authorName}
-        onChange={(e) => {
-          const val = e.target.value;
-          onNameChange(val);
-          setHighlighted(0);
-          setOpen(true);
-          const directMatch = authors.find(
-            (a) => a.name.toLowerCase() === val.trim().toLowerCase(),
-          );
-          onChange(directMatch ? directMatch.id : "");
-        }}
-        onFocus={() => setOpen(true)}
-        onKeyDown={handleKeyDown}
-        aria-invalid={Boolean(error)}
-        className="h-12 rounded-xl border-palette-indigo-300-20 bg-secondary px-4 aria-invalid:border-destructive"
-      />
-
-      {open && suggestions.length > 0 && (
-        <ul
-          role="listbox"
-          className="absolute z-50 mt-2 max-h-52 w-full overflow-auto rounded-xl border border-border bg-popover p-1.5 text-popover-foreground shadow-xl ring-1 ring-foreground/10"
-        >
-          {suggestions.map((author, idx) => (
-            <li
-              key={author.id}
-              role="option"
-              aria-selected={author.id === value}
-              onMouseDown={(e) => {
-                e.preventDefault();
-                select(author);
-              }}
-              onMouseEnter={() => setHighlighted(idx)}
-              className={`cursor-pointer rounded-lg px-3 py-2.5 text-sm outline-none transition-colors ${
-                idx === highlighted
-                  ? "bg-accent font-semibold text-accent-foreground"
-                  : "bg-popover text-popover-foreground hover:bg-muted"
-              } ${author.id === value ? "text-palette-cyan-300 font-bold" : ""}`}
-            >
-              {author.name}
-            </li>
-          ))}
-        </ul>
-      )}
-
-      {error && (
-        <p role="alert" className="mt-1.5 text-xs font-semibold text-red-500">
-          {error}
-        </p>
-      )}
-    </div>
-  );
 }
 
 export function AdminBookCreateForm({
@@ -378,7 +230,10 @@ export function AdminBookCreateForm({
     <form onSubmit={submit} noValidate className="space-y-5">
       {/* Title Field */}
       <div>
-        <Label htmlFor="book-title" className="text-xs font-bold text-palette-slate-50">
+        <Label
+          htmlFor="book-title"
+          className="text-xs font-bold text-palette-slate-50"
+        >
           Title
         </Label>
         <Input
@@ -403,7 +258,10 @@ export function AdminBookCreateForm({
 
       {/* Author Field */}
       <div>
-        <Label htmlFor="book-author" className="text-xs font-bold text-palette-slate-50">
+        <Label
+          htmlFor="book-author"
+          className="text-xs font-bold text-palette-slate-50"
+        >
           Author
         </Label>
         <AuthorInputField
@@ -429,7 +287,10 @@ export function AdminBookCreateForm({
 
       {/* Category Field */}
       <div>
-        <Label htmlFor="book-category" className="text-xs font-bold text-palette-slate-50">
+        <Label
+          htmlFor="book-category"
+          className="text-xs font-bold text-palette-slate-50"
+        >
           Category
         </Label>
         <div className="mt-2">
@@ -451,7 +312,11 @@ export function AdminBookCreateForm({
               Select Category
             </option>
             {categories.map((category) => (
-              <option key={category.id} value={category.id} className="bg-card text-foreground">
+              <option
+                key={category.id}
+                value={category.id}
+                className="bg-card text-foreground"
+              >
                 {category.name}
               </option>
             ))}
@@ -466,7 +331,10 @@ export function AdminBookCreateForm({
 
       {/* Number of Pages Field */}
       <div>
-        <Label htmlFor="book-page-count" className="text-xs font-bold text-palette-slate-50">
+        <Label
+          htmlFor="book-page-count"
+          className="text-xs font-bold text-palette-slate-50"
+        >
           Number of Pages
         </Label>
         <Input
@@ -493,7 +361,10 @@ export function AdminBookCreateForm({
 
       {/* Description Field */}
       <div>
-        <Label htmlFor="book-description" className="text-xs font-bold text-palette-slate-50">
+        <Label
+          htmlFor="book-description"
+          className="text-xs font-bold text-palette-slate-50"
+        >
           Description
         </Label>
         <Textarea
@@ -568,7 +439,10 @@ export function AdminBookCreateForm({
           ) : (
             <div className="flex flex-col items-center justify-center py-2">
               <div className="flex size-12 items-center justify-center rounded-xl border border-palette-indigo-300-20 bg-card shadow-sm">
-                <CloudUpload className="size-6 text-palette-slate-400" aria-hidden="true" />
+                <CloudUpload
+                  className="size-6 text-palette-slate-400"
+                  aria-hidden="true"
+                />
               </div>
               <p className="mt-3 text-sm text-palette-slate-300">
                 <Button

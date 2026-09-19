@@ -3,7 +3,7 @@ export default function Loading() {
     <main
       role="status"
       aria-busy="true"
-      aria-label="Memuat konten NexRead"
+      aria-label="Loading NexRead content"
       className="mx-auto min-h-screen w-full max-w-[1160px] animate-pulse px-5 pt-7 pb-10 sm:px-8"
     >
       <div className="h-24 rounded-[32px] bg-secondary" />
@@ -13,7 +13,7 @@ export default function Loading() {
           <div key={index} className="h-[360px] rounded-[28px] bg-secondary" />
         ))}
       </div>
-      <span className="sr-only">Memuat data, mohon tunggu.</span>
+      <span className="sr-only">Loading data, please wait.</span>
     </main>
   );
 }

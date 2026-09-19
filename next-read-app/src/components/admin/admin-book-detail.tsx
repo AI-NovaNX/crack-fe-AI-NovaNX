@@ -45,9 +45,9 @@ export function AdminBookDetail({
       });
       const body = await response.json().catch(() => null);
       if (!response.ok)
-        throw new Error(body?.message || "Book belum dapat dihapus.");
+        throw new Error(body?.message || "The book could not be deleted.");
       toast({
-        title: "Book berhasil dihapus",
+        title: "Book deleted successfully",
         description: book.title,
         variant: "success",
       });
@@ -56,9 +56,9 @@ export function AdminBookDetail({
       router.refresh();
     } catch (error) {
       toast({
-        title: "Gagal menghapus book",
+        title: "Failed to delete book",
         description:
-          error instanceof Error ? error.message : "Silakan coba kembali.",
+          error instanceof Error ? error.message : "Please try again.",
         variant: "error",
       });
     } finally {
@@ -102,7 +102,7 @@ export function AdminBookDetail({
           <div className="border-t border-border pt-5">
             <h2 className="font-bold">Description</h2>
             <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-palette-slate-400">
-              {book.description || "Deskripsi buku belum tersedia."}
+              {book.description || "No description available for this book."}
             </p>
           </div>
           <div className="mt-6 flex flex-wrap gap-3">
@@ -130,7 +130,7 @@ export function AdminBookDetail({
         </p>
         {!book.reviews.length && (
           <p className="py-6 text-palette-slate-400">
-            Belum ada ulasan untuk buku ini.
+            No reviews yet for this book.
           </p>
         )}
         <div className="mt-6 grid gap-4 md:grid-cols-2">
@@ -194,7 +194,7 @@ export function AdminBookDetail({
       <section className="mb-12 border-t border-border pt-8">
         <h2 className="mb-6 text-2xl font-extrabold">Related Books</h2>
         {relatedError ? (
-          <CatalogUnavailable title="Buku terkait belum dapat dimuat" />
+          <CatalogUnavailable title="Related books could not be loaded" />
         ) : related.length ? (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
             {related.map((item) => (
@@ -217,7 +217,7 @@ export function AdminBookDetail({
           </div>
         ) : (
           <p className="text-palette-slate-400">
-            Belum ada buku lain dalam kategori ini.
+            No other books in this category yet.
           </p>
         )}
       </section>

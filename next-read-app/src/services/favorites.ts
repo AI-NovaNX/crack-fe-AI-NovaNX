@@ -16,7 +16,7 @@ export function readFavorites(userId: number): Book[] {
   const raw = localStorage.getItem(favoritesKey(userId));
   if (!raw) return [];
   const data: unknown = JSON.parse(raw);
-  if (!Array.isArray(data)) throw new Error("Data favorit tidak valid.");
+  if (!Array.isArray(data)) throw new Error("Invalid favorites data.");
   return data.filter(
     (book): book is Book =>
       isRecord(book) &&
@@ -50,7 +50,7 @@ export function readFavoriteAuthors(userId: number): Author[] {
 
   const data: unknown = JSON.parse(raw);
   if (!Array.isArray(data))
-    throw new Error("Data favorit penulis tidak valid.");
+    throw new Error("Invalid favorite authors data.");
 
   return data.filter(
     (author): author is Author =>

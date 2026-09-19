@@ -48,3 +48,44 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  if (request.headers.get("origin") !== request.nextUrl.origin)
+    return NextResponse.json(
+      { message: "Invalid origin" },
+      { status: 403, headers: responseHeaders },
+    );
+  const accessToken = request.headers.get(ADMIN_ACCESS_HEADER);
+  if (!accessToken) {
+    return NextResponse.json(
+      { message: "Please sign in." },
+      { status: 401, headers: responseHeaders },
+    );
+  }
+  const body = await request.json().catch(() => null);
+  const id =
+    body?.id !== undefined && body?.id !== null ? String(body.id).trim() : "";
+  if (!id)
+    return NextResponse.json(
+      { message: "User ID is required." },
+      { status: 400, headers: responseHeaders },
+    );
+
+  try {
+    await apiRequest(`/users/${encodeURIComponent(id)}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    return new NextResponse(null, { status: 204, headers: responseHeaders });
+  } catch (error) {
+    const status = error instanceof ApiError ? error.status : 502;
+    const message =
+      status === 409
+        ? "All books borrowed by this member must be returned and approved before the account can be deactivated."
+        : getHttpErrorMessage(
+            status,
+            error instanceof ApiError ? error.message : undefined,
+          );
+    return NextResponse.json({ message }, { status, headers: responseHeaders });
+  }
+}

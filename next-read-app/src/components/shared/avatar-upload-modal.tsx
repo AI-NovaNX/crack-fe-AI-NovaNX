@@ -63,11 +63,11 @@ export function AvatarUploadModal({
     setError("");
     if (!nextFile) return;
     if (!ACCEPTED_TYPES.includes(nextFile.type)) {
-      setError("Gunakan file JPG, PNG, WEBP, atau GIF.");
+      setError("Use a JPG, PNG, WEBP, or GIF file.");
       return;
     }
     if (nextFile.size > MAX_SIZE) {
-      setError("Ukuran gambar maksimal 5 MB.");
+      setError("The image must be at most 5 MB.");
       return;
     }
     if (previewRef.current) URL.revokeObjectURL(previewRef.current);
@@ -79,7 +79,7 @@ export function AvatarUploadModal({
 
   async function uploadAvatar() {
     if (!file || saving) {
-      setError("Pilih gambar terlebih dahulu.");
+      setError("Please select an image first.");
       return;
     }
     setSaving(true);
@@ -92,14 +92,14 @@ export function AvatarUploadModal({
         body: formData,
       });
       const body = await response.json();
-      if (!response.ok) throw new Error(body.message || "Avatar belum dapat diunggah.");
+      if (!response.ok) throw new Error(body.message || "The avatar could not be uploaded.");
       onUploaded(body.user?.avatar ?? body.avatar ?? null);
       changeOpen(false);
     } catch (error) {
       setError(
         error instanceof Error
           ? error.message
-          : "Periksa koneksi Anda lalu coba kembali.",
+          : "Check your connection and try again.",
       );
     } finally {
       setSaving(false);

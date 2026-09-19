@@ -61,7 +61,7 @@ export function DetailContent({
           <div className="border-t border-border pt-5">
             <h2 className="font-bold">Description</h2>
             <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-palette-slate-400">
-              {book.description || "Deskripsi buku belum tersedia."}
+              {book.description || "No description available for this book."}
             </p>
           </div>
           <div className="mt-6 flex flex-wrap gap-3">
@@ -83,7 +83,7 @@ export function DetailContent({
           </div>
           {unavailable && (
             <p className="mt-3 text-xs text-palette-slate-400">
-              Buku sedang tidak tersedia untuk dipinjam.
+              This book is currently unavailable to borrow.
             </p>
           )}
           <div className="mt-4">
@@ -98,7 +98,7 @@ export function DetailContent({
         </p>
         {!book.reviews.length && (
           <p className="py-6 text-palette-slate-400">
-            Belum ada ulasan untuk buku ini.
+            No reviews yet for this book.
           </p>
         )}
         <div className="mt-6 grid gap-4 md:grid-cols-2">
@@ -161,7 +161,7 @@ export function DetailContent({
       <section className="mb-12 border-t border-border pt-8">
         <h2 className="mb-6 text-2xl font-extrabold">Related Books</h2>
         {relatedError ? (
-          <CatalogUnavailable title="Buku terkait belum dapat dimuat" />
+          <CatalogUnavailable title="Related books could not be loaded" />
         ) : related.length ? (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
             {related.map((item) => (
@@ -184,7 +184,7 @@ export function DetailContent({
           </div>
         ) : (
           <p className="text-palette-slate-400">
-            Belum ada buku lain dalam kategori ini.
+            No other books in this category yet.
           </p>
         )}
       </section>

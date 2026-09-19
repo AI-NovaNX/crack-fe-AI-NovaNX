@@ -62,7 +62,7 @@ export function AdminHeader({ user }: AdminHeaderProps) {
           meta?: { total?: number };
         } | null;
         if (!response.ok) {
-          throw new Error("Notifikasi return belum dapat dimuat.");
+          throw new Error("Return notifications could not be loaded.");
         }
         setPendingReturns(
           typeof body?.meta?.total === "number" ? body.meta.total : 0,
@@ -70,7 +70,7 @@ export function AdminHeader({ user }: AdminHeaderProps) {
       } catch {
         if (!controller.signal.aborted) {
           setPendingReturns(0);
-          setNotificationError("Notifikasi return belum dapat dimuat.");
+          setNotificationError("Return notifications could not be loaded.");
         }
       }
     }
@@ -87,13 +87,13 @@ export function AdminHeader({ user }: AdminHeaderProps) {
     setLoggingOut(true);
     try {
       await submitAuth("logout");
-      toast({ title: "Berhasil keluar" });
+      toast({ title: "Signed out" });
       router.push("/login");
       router.refresh();
     } catch {
       toast({
-        title: "Gagal keluar",
-        description: "Periksa koneksi Anda lalu coba kembali.",
+        title: "Sign out failed",
+        description: "Check your connection and try again.",
         variant: "error",
       });
     } finally {
@@ -236,22 +236,22 @@ export function AdminHeader({ user }: AdminHeaderProps) {
       <AlertDialog open={logoutDialogOpen} onOpenChange={setLogoutDialogOpen}>
         <AlertDialogContent>
           <AlertDialogTitle className="text-xl font-extrabold">
-            Keluar dari NexRead Admin?
+            Sign out of NexRead Admin?
           </AlertDialogTitle>
           <AlertDialogDescription className="pt-2 text-sm leading-6 text-palette-slate-400">
-            Sesi Admin Anda akan diakhiri pada perangkat ini.
+            Your Admin session will end on this device.
           </AlertDialogDescription>
           <div className="flex justify-end gap-3 pt-6">
             <AlertDialogCancel
               className={buttonVariants({ variant: "outline" })}
             >
-              Batal
+              Cancel
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={() => void logout()}
               className={buttonVariants({ variant: "destructive" })}
             >
-              Ya, keluar
+              Yes, sign out
             </AlertDialogAction>
           </div>
         </AlertDialogContent>

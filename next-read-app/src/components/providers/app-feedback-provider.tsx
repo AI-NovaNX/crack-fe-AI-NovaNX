@@ -50,7 +50,7 @@ function OfflineBanner() {
       className="fixed inset-x-0 top-0 z-[100] flex items-center justify-center gap-2 bg-amber-500 px-4 py-2 text-center text-sm font-bold text-slate-950 shadow-lg"
     >
       <WifiOff className="size-4" aria-hidden="true" />
-      Anda sedang offline. Data terakhir tetap ditampilkan jika tersedia.
+      You are offline. The last available data is still shown.
     </div>
   );
 }
@@ -104,7 +104,7 @@ function Toast({ item, dismiss }: { item: ToastItem; dismiss: () => void }) {
 
           <button
             type="button"
-            aria-label="Tutup notifikasi"
+            aria-label="Close notification"
             onClick={dismiss}
             className="relative rounded-full p-1 text-slate-400 hover:bg-white/10 hover:text-white"
           >
@@ -134,7 +134,7 @@ function Toast({ item, dismiss }: { item: ToastItem; dismiss: () => void }) {
       </div>
       <button
         type="button"
-        aria-label="Tutup notifikasi"
+        aria-label="Close notification"
         onClick={dismiss}
         className="rounded-full p-1 text-palette-slate-400 hover:bg-secondary hover:text-foreground"
       >
@@ -160,7 +160,7 @@ export function AppFeedbackProvider({ children }: { children: ReactNode }) {
       <OfflineBanner />
       {children}
       <div
-        aria-label="Notifikasi"
+        aria-label="Notifications"
         className="pointer-events-none fixed right-4 bottom-4 z-[90] flex w-[min(420px,calc(100vw-2rem))] flex-col gap-3"
       >
         {toasts.map((item) => (

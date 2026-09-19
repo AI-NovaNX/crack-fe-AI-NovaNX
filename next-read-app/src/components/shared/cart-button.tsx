@@ -25,12 +25,12 @@ export function CartButton({
   const label = isAdmin
     ? "Admins cannot borrow books"
     : busy
-      ? "Menambahkan buku…"
+      ? "Adding book…"
       : exists
-        ? "Sudah di cart — buka My Cart"
+        ? "Already in cart — open My Cart"
         : unavailable
-          ? "Buku tidak tersedia"
-          : "Tambahkan ke cart";
+          ? "Book unavailable"
+          : "Add to cart";
   return (
     <button
       type="button"
@@ -49,24 +49,24 @@ export function CartButton({
           const result = await add(book.id);
           if (result === "guest") {
             toast({
-              title: "Silakan login untuk menambahkan buku",
+              title: "Please sign in to add this book",
               variant: "info",
             });
             router.push("/login");
           } else if (result === "existing") router.push("/cart");
           else if (result === "added")
             toast({
-              title: "Buku ditambahkan ke keranjang",
+              title: "Book added to cart",
               description: book.title,
               variant: "success",
             });
         } catch (error) {
           toast({
-            title: "Gagal menambahkan buku",
+            title: "Failed to add book",
             description:
               error instanceof Error
                 ? error.message
-                : "Periksa koneksi Anda lalu coba kembali.",
+                : "Check your connection and try again.",
             variant: "error",
           });
         }

@@ -38,22 +38,22 @@ export function CartContent() {
       });
       const body = await response.json();
       if (!response.ok)
-        throw new Error(body.message || "Item belum dapat dihapus.");
+        throw new Error(body.message || "The item could not be removed.");
       setItems((items) => items.filter((current) => current.id !== item.id));
       setSelected((ids) => ids.filter((id) => id !== item.id));
       window.dispatchEvent(new Event("nexread-cart-changed"));
       toast({
-        title: "Buku dihapus dari keranjang",
+        title: "Book removed from cart",
         description: item.book.title,
         variant: "success",
       });
     } catch (error) {
       toast({
-        title: "Gagal menghapus item",
+        title: "Failed to remove item",
         description:
           error instanceof Error
             ? error.message
-            : "Periksa koneksi Anda lalu coba kembali.",
+            : "Check your connection and try again.",
         variant: "error",
       });
     } finally {
@@ -75,13 +75,13 @@ export function CartContent() {
           return;
         }
         if (!response.ok)
-          throw new Error(body.message || "Keranjang belum dapat dimuat.");
+          throw new Error(body.message || "The cart could not be loaded.");
         setItems(body);
         setSelected([]);
         setStatus("ready");
       } catch (e) {
         if (controller.signal.aborted) return;
-        setError(e instanceof Error ? e.message : "Periksa koneksi Anda.");
+        setError(e instanceof Error ? e.message : "Check your connection.");
         setStatus("error");
       }
     }
@@ -99,13 +99,13 @@ export function CartContent() {
         role="status"
         className="h-64 animate-pulse rounded-[28px] border border-border bg-secondary p-8"
       >
-        Memuat keranjang…
+        Loading cart…
       </div>
     );
   if (status === "error")
     return (
       <CatalogUnavailable
-        title="Keranjang belum dapat dimuat"
+        title="Cart could not be loaded"
         message={error}
         onRetry={() => {
           setStatus("loading");
@@ -117,7 +117,7 @@ export function CartContent() {
     return (
       <div className="rounded-[28px] border border-border bg-secondary p-10 text-center">
         <h2 className="text-xl font-bold">
-          Login untuk melihat keranjang Anda
+          Login to view your cart
         </h2>
         <Link
           href="/login"
@@ -134,9 +134,9 @@ export function CartContent() {
           className="mx-auto mb-4 size-10 text-skyblue"
           aria-hidden="true"
         />
-        <h2 className="text-xl font-bold">Keranjang Anda masih kosong</h2>
+        <h2 className="text-xl font-bold">Your cart is still empty</h2>
         <p className="mt-3 text-palette-slate-400">
-          Temukan buku yang ingin Anda baca.
+          Find a book you'd like to read.
         </p>
         <Link
           href="/book-list"
@@ -208,8 +208,8 @@ export function CartContent() {
                 type="button"
                 onClick={() => removeItem(item)}
                 disabled={removing.includes(item.id)}
-                aria-label={`Hapus ${item.book.title} dari keranjang`}
-                title="Hapus dari keranjang"
+                aria-label={`Remove ${item.book.title} from cart`}
+                title="Remove from cart"
                 aria-busy={removing.includes(item.id)}
                 className="flex size-6 shrink-0 items-center justify-center self-center rounded-full text-palette-slate-400 transition-colors hover:bg-red-500/10 hover:text-red-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-400 disabled:cursor-wait disabled:opacity-50"
               >
@@ -241,7 +241,7 @@ export function CartContent() {
         >
           {isAdmin ? "Admins cannot borrow" : "Borrow Book"}
         </button>
-        <p className="sr-only">Peminjaman buku pilihan belum tersedia.</p>
+        <p className="sr-only">Borrowing selected books is not yet available.</p>
       </aside>
     </div>
   );

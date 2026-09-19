@@ -18,8 +18,14 @@ export async function GET(request: NextRequest) {
       { status: 401, headers: responseHeaders },
     );
 
-  const page = Math.max(1, Number(request.nextUrl.searchParams.get("page")) || 1);
-  const limit = Math.min(100, Math.max(1, Number(request.nextUrl.searchParams.get("limit")) || 10));
+  const page = Math.max(
+    1,
+    Number(request.nextUrl.searchParams.get("page")) || 1,
+  );
+  const limit = Math.min(
+    100,
+    Math.max(1, Number(request.nextUrl.searchParams.get("limit")) || 10),
+  );
   const title = request.nextUrl.searchParams.get("title")?.trim();
   const available = request.nextUrl.searchParams.get("available");
   const params = new URLSearchParams({
@@ -54,7 +60,9 @@ export async function POST(request: NextRequest) {
       { message: "Please sign in." },
       { status: 401, headers: responseHeaders },
     );
-  const multipart = request.headers.get("content-type")?.startsWith("multipart/form-data");
+  const multipart = request.headers
+    .get("content-type")
+    ?.startsWith("multipart/form-data");
   const form = multipart ? await request.formData().catch(() => null) : null;
   const body = multipart
     ? form && Object.fromEntries(form.entries())
@@ -76,16 +84,18 @@ export async function POST(request: NextRequest) {
     const book = await apiRequest("/books", {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
-      body: form ?? JSON.stringify({
-        id: body.id.trim(),
-        title: body.title.trim(),
-        authorId: body.authorId,
-        categoryId: body.categoryId,
-        pageCount: body.pageCount || null,
-        totalCopies: body.totalCopies || 1,
-        description: body.description?.trim() || null,
-        coverUrl: body.coverUrl?.trim() || null,
-      }),
+      body:
+        form ??
+        JSON.stringify({
+          id: body.id.trim(),
+          title: body.title.trim(),
+          authorId: body.authorId,
+          categoryId: body.categoryId,
+          pageCount: body.pageCount || null,
+          totalCopies: body.totalCopies || 1,
+          description: body.description?.trim() || null,
+          coverUrl: body.coverUrl?.trim() || null,
+        }),
     });
     return NextResponse.json(book, {
       status: 201,
@@ -149,6 +159,7 @@ export async function PATCH(request: NextRequest) {
 
   const payload = {
     title: body.title,
+    authorId: body.authorId || undefined,
     rating: body.rating,
     coverUrl: body.coverUrl || null,
     description: body.description || null,

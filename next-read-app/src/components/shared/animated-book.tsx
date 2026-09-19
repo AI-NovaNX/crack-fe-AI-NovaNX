@@ -8,19 +8,19 @@ import { cn } from "@/lib/utils";
 // Original decorative prose, not an excerpt from the book or its author.
 const pageParagraphs = [
   [
-    "Cahaya pagi jatuh di antara jendela dan meja kayu. Di sana, sebuah buku menunggu untuk dibuka, menyimpan perjalanan yang belum pernah dimulai.",
-    "Ia duduk perlahan dan membalik halaman pertama. Di luar, kota mulai terjaga. Namun di ruangan kecil itu, waktu berjalan lebih tenang, mengikuti setiap kata yang dibacanya.",
-    "Kadang sebuah langkah kecil membawa kita ke tempat yang jauh. Begitu pula sebuah kalimat: sederhana pada mulanya, lalu tinggal lama dalam ingatan.",
+    "Morning light falls between the window and the wooden desk. There, a book waits to be opened, holding a journey that has never begun.",
+    "She sits down slowly and turns the first page. Outside, the city begins to wake. But in that small room, time moves more gently, following every word she reads.",
+    "Sometimes a small step carries us somewhere far away. So does a sentence: simple at first, then lingering long in memory.",
   ],
   [
-    "Jalan setapak itu berbelok melewati taman. Daun-daun bergerak pelan, seolah saling bertukar cerita tentang hujan yang turun semalam.",
-    "Ia berhenti di bawah pohon dan membuka catatannya. Ada banyak hal yang ingin disimpan: warna langit, suara langkah, dan percakapan singkat yang membuat hari terasa berbeda.",
-    "Tidak semua pertanyaan membutuhkan jawaban segera. Beberapa cukup dibawa berjalan, sampai suatu hari kita menemukan cara baru untuk memahaminya.",
+    "The path curved past the garden. The leaves moved slowly, as if trading stories about last night's rain.",
+    "He stopped beneath a tree and opened his notebook. There was so much he wanted to keep: the color of the sky, the sound of footsteps, and a brief conversation that made the day feel different.",
+    "Not every question needs an answer right away. Some are better carried along, until one day we find a new way to understand them.",
   ],
   [
-    "Menjelang sore, cahaya berubah menjadi keemasan. Bayangan memanjang di lantai, sementara halaman-halaman yang telah dibaca bertumpuk di sebelah kiri.",
-    "Ia tersenyum pada sebuah kalimat, lalu membacanya sekali lagi. Kata-kata yang sama ternyata bisa terasa berbeda ketika kita memberi waktu untuk mendengarkannya.",
-    "Perjalanan belum selesai. Masih ada pintu yang belum dibuka dan cerita yang belum ditemukan. Dengan hati tenang, ia membalik halaman berikutnya.",
+    "As evening approached, the light turned golden. Shadows stretched across the floor, while the pages already read piled up on the left.",
+    "She smiled at a sentence, then read it once more. The same words could feel different when we take the time to truly listen to them.",
+    "The journey isn't over. There are still doors unopened and stories not yet found. With a calm heart, she turns to the next page.",
   ],
 ];
 
@@ -75,12 +75,12 @@ export function AnimatedBook({ title, author, coverUrl, coverClassName, compact 
           >
             <div className="pointer-events-none absolute inset-x-[11%] inset-y-[7%] flex select-none flex-col overflow-hidden font-serif text-[#514637]">
               <div className="truncate border-b border-[#b9aa91]/50 pb-[4%] text-center text-[3.2cqw] uppercase tracking-[0.12em]">
-                Halaman ilustrasi
+                Illustration page
               </div>
               <div className="py-[7%] text-center">
-                <div className="text-[3.5cqw] tracking-[0.18em]">BAB {page + 1}</div>
+                <div className="text-[3.5cqw] tracking-[0.18em]">CHAPTER {page + 1}</div>
                 <div className="mt-[3%] text-[5.5cqw] leading-tight italic">
-                  {["Sebuah Permulaan", "Sepanjang Perjalanan", "Halaman Berikutnya"][page]}
+                  {["A Beginning", "Along the Journey", "The Next Page"][page]}
                 </div>
               </div>
               <div className="min-h-0 flex-1 overflow-hidden text-justify text-[3.8cqw] leading-[1.65]">

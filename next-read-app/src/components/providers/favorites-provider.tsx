@@ -70,7 +70,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
         }
 
         if (!response.ok) {
-          throw new Error(body.message || "Status akun belum dapat diperiksa.");
+          throw new Error(body.message || "Your account status could not be verified.");
         }
 
         const storedBooks = readFavorites(body.user.id);
@@ -84,7 +84,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
       } catch (e) {
         if (signal.aborted) return;
         setError(
-          e instanceof Error ? e.message : "Favorit belum dapat dimuat.",
+          e instanceof Error ? e.message : "Your favorites could not be loaded.",
         );
         setStatus("error");
       }
@@ -112,7 +112,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
           setAuthors(readFavoriteAuthors(userId));
         }
       } catch {
-        setError("Penyimpanan favorit tidak dapat dibaca.");
+        setError("Favorites storage could not be read.");
         setStatus("error");
       }
     }
@@ -123,7 +123,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
 
   function toggle(book: Book) {
     if (status !== "ready" || userId === null) {
-      throw new Error("Silakan login untuk menyimpan favorit.");
+      throw new Error("Please sign in to save favorites.");
     }
 
     const current = readFavorites(userId);
@@ -137,7 +137,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
 
   function toggleAuthor(author: Author) {
     if (status !== "ready" || userId === null) {
-      throw new Error("Silakan login untuk menyimpan favorit penulis.");
+      throw new Error("Please sign in to save favorite authors.");
     }
 
     const current = readFavoriteAuthors(userId);

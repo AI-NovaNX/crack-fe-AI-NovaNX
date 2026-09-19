@@ -130,7 +130,7 @@ export default function ReviewsPage() {
         return;
       }
       if (!response.ok)
-        throw new Error(body?.message || "Review belum dapat dimuat.");
+        throw new Error(body?.message || "Reviews could not be loaded.");
 
       const payload = body as ReviewsResponse;
       const items = Array.isArray(payload.data)
@@ -144,7 +144,7 @@ export default function ReviewsPage() {
       setError(
         loadError instanceof Error
           ? loadError.message
-          : "Periksa koneksi Anda.",
+          : "Check your connection.",
       );
       setStatus("error");
     }
@@ -209,11 +209,11 @@ export default function ReviewsPage() {
           />
         ) : status === "login" ? (
           <div className="rounded-[22px] border border-border bg-secondary px-5 py-8 text-center text-sm text-palette-slate-400">
-            Silakan{" "}
+            Please{" "}
             <Link href="/login" className="font-bold text-cyan-300 underline">
               login
             </Link>{" "}
-            untuk melihat review Anda.
+            to see your reviews.
           </div>
         ) : status === "error" && reviews.length === 0 ? (
           <div className="rounded-[22px] border border-border bg-secondary px-5 py-8 text-center text-sm text-palette-slate-400">
@@ -227,7 +227,7 @@ export default function ReviewsPage() {
               }}
               className="mt-3 rounded-full bg-accent px-4 py-2 font-bold text-foreground"
             >
-              Coba lagi
+              Try again
             </button>
           </div>
         ) : filteredReviews.length > 0 ? (
@@ -236,7 +236,7 @@ export default function ReviewsPage() {
           ))
         ) : (
           <div className="rounded-[22px] border border-border bg-secondary px-5 py-8 text-center text-sm text-palette-slate-400">
-            Tidak ada review yang cocok dengan pencarian Anda.
+            No reviews match your search.
           </div>
         )}
         {status !== "login" && page < totalPages && (
@@ -250,7 +250,7 @@ export default function ReviewsPage() {
             }}
             className="mx-auto block rounded-full border border-border bg-secondary px-5 py-2 text-xs font-bold text-foreground disabled:opacity-50"
           >
-            {status === "loading" ? "Memuat..." : "Load More"}
+            {status === "loading" ? "Loading..." : "Load More"}
           </button>
         )}
       </section>

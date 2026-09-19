@@ -15,7 +15,7 @@ export type PaginatedBooksResponse = {
   meta: { page: number; limit: number; total: number; totalPages: number };
 };
 export type ApiBook = Omit<Book, "author" | "category" | "coverUrl"> & {
-  author: { name: string };
+  author: { id: string; name: string };
   category: { name: string };
   coverUrl?: string | null;
   coverImage?: string | null;
@@ -123,6 +123,7 @@ export type BookReview = {
   createdAt: string;
 };
 export type BookDetail = Book & {
+  authorId: string;
   reviewCount: number;
   reviews: BookReview[];
   availableCopies: number;
@@ -137,6 +138,7 @@ export async function getBookDetail(id: string): Promise<BookDetail | null> {
     );
     return {
       ...mapBook(book),
+      authorId: book.author.id,
       reviewCount: book.reviewCount,
       reviews: book.reviews ?? [],
       availableCopies: book.availableCopies,

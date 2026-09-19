@@ -172,7 +172,7 @@ export function AdminDashboard() {
         const failedResponse = responses.findIndex((response) => !response.ok);
         if (failedResponse >= 0) {
           const body = bodies[failedResponse] as { message?: string } | null;
-          throw new Error(body?.message ?? "Dashboard belum dapat dimuat.");
+          throw new Error(body?.message ?? "The dashboard could not be loaded.");
         }
         setAuthorStatistics(
           Array.isArray(bodies[1]) ? (bodies[1] as AuthorStatistic[]) : [],
@@ -197,7 +197,7 @@ export function AdminDashboard() {
         setError(
           loadError instanceof Error
             ? loadError.message
-            : "Dashboard belum dapat dimuat.",
+            : "The dashboard could not be loaded.",
         );
       } finally {
         if (!controller.signal.aborted) setLoading(false);
@@ -253,7 +253,7 @@ export function AdminDashboard() {
         <Card className="mt-7 rounded-[24px] border-red-400/25 bg-red-400/5 py-0 text-red-200 ring-0">
           <CardContent className="flex flex-wrap items-center justify-between gap-4 px-5 py-5">
             <div>
-              <p className="font-bold">Dashboard belum dapat dimuat.</p>
+              <p className="font-bold">The dashboard could not be loaded.</p>
               <p className="mt-1 text-sm text-red-200/70">{error}</p>
             </div>
             <Button
@@ -347,7 +347,7 @@ export function AdminDashboard() {
               </ol>
             ) : (
               <p className="py-10 text-center text-sm text-palette-slate-400">
-                Belum ada data peminjaman.
+                No loan data yet.
               </p>
             )}
           </CardContent>
@@ -426,7 +426,7 @@ export function AdminDashboard() {
               </ol>
             ) : (
               <p className="py-8 text-center text-sm text-palette-slate-400">
-                Belum ada statistik author.
+                No author statistics yet.
               </p>
             )}
           </CardContent>
@@ -477,7 +477,7 @@ export function AdminDashboard() {
               </div>
             ) : (
               <p className="py-8 text-center text-sm text-palette-slate-400">
-                Belum ada statistik kategori.
+                No category statistics yet.
               </p>
             )}
           </CardContent>
