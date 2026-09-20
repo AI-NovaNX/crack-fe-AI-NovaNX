@@ -10,9 +10,11 @@ afterEach(() => {
 
 describe("submitAuth", () => {
   it("posts credentials and returns the parsed user on success", async () => {
-    const fetchMock = vi.fn().mockResolvedValue(
-      new Response(JSON.stringify({ user: { id: 1 } }), { status: 200 }),
-    );
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(
+        new Response(JSON.stringify({ user: { id: 1 } }), { status: 200 }),
+      );
     vi.stubGlobal("fetch", fetchMock);
     const listener = vi.fn();
     window.addEventListener(AUTH_CHANGED_EVENT, listener);
@@ -35,7 +37,9 @@ describe("submitAuth", () => {
     localStorage.setItem("currentUser", "x");
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue(new Response(JSON.stringify({}), { status: 200 })),
+      vi
+        .fn()
+        .mockResolvedValue(new Response(JSON.stringify({}), { status: 200 })),
     );
 
     await submitAuth("logout");

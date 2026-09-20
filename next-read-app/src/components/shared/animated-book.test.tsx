@@ -12,9 +12,7 @@ describe("AnimatedBook", () => {
         coverClassName="bg-slate-700"
       />,
     );
-    expect(
-      screen.getAllByText("Illustration page").length,
-    ).toBeGreaterThan(0);
+    expect(screen.getAllByText("Illustration page").length).toBeGreaterThan(0);
   });
 
   it("renders the cover image when a coverUrl is provided", () => {
