@@ -18,6 +18,8 @@ describe("error messages", () => {
       "A title is required.",
     );
     expect(getHttpErrorMessage(403)).toContain("do not have permission");
+    expect(getHttpErrorMessage(409)).toContain("conflict");
+    expect(getHttpErrorMessage(429)).toContain("Too many requests");
     expect(getHttpErrorMessage(503)).toContain("trouble responding");
   });
 

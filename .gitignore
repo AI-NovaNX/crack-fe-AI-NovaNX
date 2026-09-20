@@ -45,6 +45,7 @@ yarn-error.log*
 
 # local assets not part of the app
 Cover-Buku-13-Judul/
+Cover-Buku-13-Judul.zip
 
 # typescript
 *.tsbuildinfo

@@ -157,6 +157,7 @@ npm run test:e2e
 Vitest and React Testing Library cover deterministic unit and component
 behavior. Playwright verifies browser-level user journeys in Chromium. Run
 `npx playwright install chromium` once before the first local E2E run.
+The coverage command enforces a minimum of 25% for statements and lines.
 
 Coverage and browser reports are generated locally but ignored by Git; CI
 uploads them when a test job fails. See [docs/testing.md](docs/testing.md) for

@@ -25,6 +25,9 @@ Generate unit/component coverage:
 npm run test:coverage
 ```
 
+The coverage run enforces a minimum global threshold of 25% for statements
+and lines, so regressions fail locally and in CI.
+
 Run E2E tests:
 
 ```bash

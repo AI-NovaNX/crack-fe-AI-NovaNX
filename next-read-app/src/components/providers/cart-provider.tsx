@@ -67,7 +67,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
     window.addEventListener(AUTH_CHANGED_EVENT, auth);
     window.addEventListener("focus", update);
     return () => {
+      // Invalidate whichever async request/generation is current at cleanup time.
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       request.current++;
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       generation.current++;
       window.removeEventListener("nexread-cart-changed", update);
       window.removeEventListener(AUTH_CHANGED_EVENT, auth);
