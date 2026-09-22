@@ -171,6 +171,7 @@ export function AnimatedBook({
               src={coverUrl}
               alt={`Cover ${title}`}
               fill
+              unoptimized={/^https?:\/\//i.test(coverUrl)}
               sizes={
                 compact
                   ? "88px"

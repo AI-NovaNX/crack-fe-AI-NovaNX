@@ -25,6 +25,20 @@ describe("AnimatedBook", () => {
     );
     expect(screen.getByAltText("Cover Dune")).toBeInTheDocument();
   });
+
+  it("loads an external cover directly without the Next.js optimizer", () => {
+    const coverUrl = "https://images.example.com/covers/dune.jpg";
+
+    render(
+      <AnimatedBook
+        title="Dune"
+        coverUrl={coverUrl}
+        coverClassName="bg-slate-700"
+      />,
+    );
+
+    expect(screen.getByAltText("Cover Dune")).toHaveAttribute("src", coverUrl);
+  });
 });
 
 describe("BookHoverCard", () => {
