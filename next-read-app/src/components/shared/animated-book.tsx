@@ -171,8 +171,11 @@ export function AnimatedBook({
               src={coverUrl}
               alt={`Cover ${title}`}
               fill
-              unoptimized
-              sizes="(min-width: 1024px) 270px, 50vw"
+              sizes={
+                compact
+                  ? "88px"
+                  : "(min-width: 1280px) 200px, (min-width: 1024px) 30vw, (min-width: 640px) 45vw, calc(100vw - 64px)"
+              }
               className="object-cover"
               onError={() => setFailedUrl(coverUrl)}
             />
